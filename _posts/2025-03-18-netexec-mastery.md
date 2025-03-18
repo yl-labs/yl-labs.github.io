@@ -1,5 +1,6 @@
 ---
 layout: post
+pin: true
 title: Netexec Mastery
 date: '2025-03-18 18:26:05 -0500'
 categories: [jekyll, netexec]
