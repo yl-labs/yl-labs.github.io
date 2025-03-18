@@ -5,8 +5,10 @@ tags:
 excerpt: "Introductory guide to NetExec"
 categories:
   - "Modules"
-img_path: "/assets/img/netexec-mastery/cover.png"
+image:
+  path: /assets/img/netexec-mastery/cover.png
 ---
+
 
 # Introduction
 
