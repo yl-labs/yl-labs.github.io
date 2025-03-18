@@ -1,18 +1,11 @@
 ---
-title: "HTB • Sau"
+title: "Netexec Mastery - Introduction"
 tags:
-  - "Beginner"
-  - "Linux"
-  - "Easy Difficulty"
-  - "Web"
-  - "CVE"
-  - "SSRF"
-  - "Sudo"
-excerpt: "Sau is an easy machine on Hack The Box that involves web exploitation, Server Side Request Forgery (SSRF), Common Vulnerabilities and Exposures (CVEs), and Sudo policy exploitation."
+  - "netexec"
+excerpt: "Introductory guide to NetExec"
 categories:
-  - "Writeups"
-  - "Hack the Box Machines"
-img_path: "/assets/img/post/htb-machines-sau/"
+  - "Modules"
+img_path: "/assets/img/netexec-mastery/cover.png"
 ---
 
 # Introduction
