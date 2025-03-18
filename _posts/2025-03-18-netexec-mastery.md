@@ -1,3 +1,9 @@
+---
+layout: post
+title: Netexec Mastery
+date: '2025-03-18 18:26:05 -0500'
+comments: false
+---
 
 # Introduction
 
@@ -7,7 +13,7 @@
 
 *NetExec* supports a multitude of protocols for our attacks. Simply running *netexec* in our terminal will reveal a bunch of available protocols:
 
-![](Pasted image 20250308182319.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250308182319.png)
 
 ## SMB
 
@@ -370,7 +376,7 @@ In the *Permissions* tab, our permissions for each share are listed. In our case
 
 The *Remark* shows a short description of each share. If a custom share is created on the machine, you may see a custom description like the one below:
 
-![](Pasted image 20250309191526.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250309191526.png)
 
 
 ### Accessing Shares
@@ -378,21 +384,21 @@ The *Remark* shows a short description of each share. If a custom share is creat
 In this section, we will be utilizing an actual credential: *lab-user : lab* for simplicity. In order to list shares, you may utilize the *spider_plus* module. We will dive deeper into available modules later on. But for now, the *spider_plus* module allows us to get an overview of *readable* files to us within the shares.
 
 
-![](Pasted image 20250309193401.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250309193401.png)
 
 Available files will be listed it out in the temporary generated file which in our case is: */tmp/nxc_hosted/nxc_spider_plus/10.250.0.32.json*
 
-![](Pasted image 20250309192239.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250309192239.png)
 
 So we have filenames... it'd be great if we could also access them right? To do so, we can make use of the *-o DOWNLOAD_FLAG=True* flag within the *spider_plus* module. That way, all available files will be downloaded to our local machine:
 
-![](Pasted image 20250309193456.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250309193456.png)
 
 So it looks like we downloaded files, but it's not directly obvious which ones were downloaded. We may once again have a look at the temporary *.json* file, but doing so each time isn't very time friendly.
 
 Instead, let's add the *--debug* file to our command:
 
-![](Pasted image 20250309192804.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250309192804.png)
 
 Using the *--debug* flag, we are able to get more verbose information about what's happening in the background. This flag applies to any *netexec* command and not just to the *spider_plus* module.
 
@@ -426,7 +432,7 @@ Once again, the first occurrence of *random.txt* is the location on our VM and t
 
 On Windows, we can indeed verify the file is there:
 
-![](Pasted image 20250309194019.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250309194019.png)
 
 ### More Enumeration
 
@@ -436,52 +442,52 @@ In following categories, we will enter territories where it is better to have hi
 
 Let's start out by checking out the *--loggedon-users* flag which as it suggests, allows listing currently active users on the system.
 
-![](Pasted image 20250309225511.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250309225511.png)
 
 #### Disks
 
 This may prove to be useful if the computer in question has a USB stick plugged in or some other type of device connected.
 
-![](Pasted image 20250309225714.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250309225714.png)
 
 #### List Of Users
 
 Having the ability to list users can be powerful. If you are in possession of a password; having a list of users can enable you to perform a spraying attack. Additionally, it is not impossible to encounter temporary passwords listed in user descriptions 😉
 
-![](Pasted image 20250309225758.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250309225758.png)
 
 If you have your eyes fixated on one single user, you may always specify that user to avoid getting unecessary output. For example, we decided to only check for *lab-user*.
 
-![](Pasted image 20250309230032.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250309230032.png)
 
 Optionally, if *--users* fails due to a permission issue, you may always fall back to *--rid-brute*. This option will perform a brute force of possible RID's. Of course, this is not super duper OPSEC friendly, but this is an option nonetheless.
 
 To use it, you would need to specify how many RID's you want to brute force. In this case, we chose to go with *1000*:
 
-![](Pasted image 20250310163122.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250310163122.png)
 #### Password Policy
 
 Knowing password policies can also be very useful. If the default password policy is quite strong, then it's an indication that attempting to brute force/crack passwords might not be the move.
 
-![](Pasted image 20250309230321.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250309230321.png)
 
 #### Groups
 
 Listing groups can also be useful. Groups such as *Web Server Admins* or similar may more insight into who your target should be.
 
-![](Pasted image 20250311191255.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250311191255.png)
 
 #### Local Groups
 
 The same theory applies here as well.
 
-![](Pasted image 20250311191505.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250311191505.png)
 
 #### Computers
 
 Listing computers is especially useful in an Active Directory domain environment. This can help orient your attacks towards different *servers/workstations* available in the network.
 
-![](Pasted image 20250311191816.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250311191816.png)
 
 
 
@@ -493,29 +499,29 @@ Alright alright, enumeration is boring. Let's execute some commands/code on our 
 
 Basic command execution can be achieved using the *-x* flag like so:
 
-![](Pasted image 20250310163449.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250310163449.png)
 
 *-x* will run your commands with *cmd.exe*. If you prefer *powershell*, *-X* can be used:
 
-![](Pasted image 20250310164200.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250310164200.png)
 
 If *-x* & *-X* fail, we can trying playing with the method of execution. Available methods include *wmiexec,smbexec,mmcexec,atexec*. *Wmiexec* is the default option. We can control the method used using the *--exec-method* flag:
 
 *smbexec -> Windows Service Control Manager used to register a service & run commands*
 
-![](Pasted image 20250310163530.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250310163530.png)
 
 *mmcexec -> Execution happens using the Microsoft Management Console*
 
-![](Pasted image 20250310163834.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250310163834.png)
 
 *atexec -> Register a malicious Scheduled Task & run it*
 
-![](Pasted image 20250310163853.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250310163853.png)
 
 And lastly, if you are executing a reverse shell or anything that you know won't return output, you can add the *--no-output* flag to avoid timeouts.
 
-![](Pasted image 20250310164330.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250310164330.png)
 
 ### Let's get some creds!
 
@@ -525,19 +531,19 @@ With admin access, performing some *post-exploitation* on the system is a good i
 
 Starting off with *--sam* which will dump the local *SAM* database on the system. Passwords in the *SAM* hive are decrypted using keys present in the *SYSTEM* hive but that's done in the background, so need to worry about it.
 
-![](Pasted image 20250310164613.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250310164613.png)
 
 **LSA**
 
 Let's move over to *LSA Secrets*. Here, you may often times find passwords used by services or *autologon* passwords.
 
-![](Pasted image 20250310172915.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250310172915.png)
 
 **NTDS**
 
 Just like we were able to dump the *SAM* local database previously, we can also dump an Active Directory domain's *NTDS.dit* file. The main difference being that all Active Directory user credentials can be retrieved from *NTDS.dit*.
 
-![](Pasted image 20250311191038.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250311191038.png)
 
 **DPAPI**
 
@@ -545,15 +551,15 @@ Just like we were able to dump the *SAM* local database previously, we can also 
 
 For example, *DPAPI* is used for encrypting credentials stored in the *Credential Manager*:
 
-![](Pasted image 20250310173649.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250310173649.png)
 
 Another example would be the *Task Scheduler*. If a certain task was configured to run as normal user, the password to run the scheduled task will also be stored as a *DPAPI* credential:
 
-![](Pasted image 20250310173902.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250310173902.png)
 
 With our admin account, we should be able to access the global *SYSTEM* master key and decrypt everything that's available.
 
-![](Pasted image 20250310173230.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250310173230.png)
 
 
 ### Kerberos Authentication With Ccache
@@ -568,7 +574,7 @@ It is likely that *NTLM* based authentication has been disabled within the domai
 
 To showcase *Kerberos* based authentication, let's first use Impacket's *getTGT.py* script to obtain a valid *Kerberos TGT* ticket. This ticket will be saved in *ccache* format which is conveniently the format expected by multiple *Linux* tools interacting with *Kerberos*.
 
-![](Pasted image 20250311204413.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250311204413.png)
 
 Next, we need to import the ticket into our current session. This can be achieved by declaring the *KRB5CCNAME* environment variable like so:
 
@@ -685,7 +691,7 @@ Those *2* attacks are:
 
 The *ASREPRoasting* attack can be targeted at *Domain Users* without pre-authentication configured. This setting can be configured like so within *dsa.msc*:
 
-![](Pasted image 20250314232120.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250314232120.png)
 
 In a nutshell, this allows us to request a working *TGT + Session Key* combination from the *Domain Controller* without the need to provide the user's password.
 
@@ -693,7 +699,7 @@ The *TGT* is encrypted using the password hash of the *krbtgt* account thus it w
 
 To execute the attack and obtain the *Session Key* in an already *John/Hashcat* ready format, we will need to use the *--asreproast* parameter. The *results.txt* in this case is the output file where obtained hashes will be stored.
 
-![](Pasted image 20250314232826.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250314232826.png)
 
 With the hash now in hand, we can attempt at cracking it:
 
@@ -748,7 +754,7 @@ C:\Users\Administrator>
 
 With the *SPN* set, it's now time to perform the attack with *netexec*. To do so, we'll need to specify the *--kerberoasting* flag and once again, *results.txt* will be our output file.
 
-![](Pasted image 20250314234903.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250314234903.png)
 
 And of course, the resulting hash can also be sent through to the cracking rig:
 
@@ -812,19 +818,19 @@ With *netexec*, we may change our protocol to *ldap* and add the *--query* param
 
 In this example however, we just want to dump all the information about the *Administrator* user.
 
-![](Pasted image 20250312211336.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250312211336.png)
 
 And now, let's say we only wanted to get the *distinguishedName* attribute back, we would run:
 
-![](Pasted image 20250312211637.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250312211637.png)
 
 That's nice. But let's say you wanted to get all users and groups back? You could use `(sAMAccountName=*)` as your query.
 
-![](Pasted image 20250312215220.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250312215220.png)
 
 Or maybe you'd like to only see all available groups? You would use *(objectClass=group)* as your query.
 
-![](Pasted image 20250312215326.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250312215326.png)
 
 But let's be real. This is aaaaa lot of output. Managing it all can become pretty hectic rather quickly. Let's take a look at an alternative in the next section. 
 
@@ -896,7 +902,7 @@ LICENSE     chrome-sandbox          chrome_200_percent.pak  libEGL.so   libffmpe
 
 Once you have *BloodHound* running, you will need to login. If it's your first time, you will be asked to change your password. The password change can be done within the *Neo4j* Web Interface available at http://localhost:7474
 
-![](Pasted image 20250313092922.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250313092922.png)
 
 Once there, you may use the following credentials for the initial connection:
 
@@ -907,29 +913,29 @@ From there, you may click on *Connect*.
 
 From there, you will be presented with the possibility to change your password. Once done, click on *Change Password* and come back to *Bloodhound*.
 
-![](Pasted image 20250313121614.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250313121614.png)
 
 In Bloodhound, you can now use your updated password. You could also press on the *Save Password* back to avoid typing it every time.
 
-![](Pasted image 20250313121717.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250313121717.png)
 
 Great stuff! Now that you are in the *Bloodhound* interface, on the right hand side, press on *Upload Data*.
 
-![](Pasted image 20250313124554.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250313124554.png)
 
 Your file explorer will then open allowing you to select the previously collected *ZIP* archive.
 
 After selecting the archive, the import will start. The time it takes to complete will of course depend on the size of the archive. Please be patient on this step. 
 
-![](Pasted image 20250313124938.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250313124938.png)
 
 When the import completes, you should be able to see some of the data as an indicator that the import succeeded.
 
-![](Pasted image 20250313125151.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250313125151.png)
 
 From there, you can now move over to the *Analysis* tab and start your analysis of *Users/Groups/ACL's*, etc.
 
-![](Pasted image 20250313125306.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250313125306.png)
 
 
 ### Doing it manually
@@ -948,7 +954,7 @@ Let's assume that you have set your eyes on the *bank-admin* user and you'd like
 netexec ldap 10.250.0.20 -u 'administrator' -p 'lab123!' -M daclread -o TARGET=bank-admin ACTION=read
 ```
 
-![](Pasted image 20250315113120.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250315113120.png)
 
 Loads of *ACL's* will be returned so it may very tedious to go through all the output. But at the very least, you will not be generating as many logs which will tremendously help you in staying under the radar. 
 
@@ -959,19 +965,19 @@ We've explored numerous enumeration techniques in the *SMB* section. But if for 
 
 For example, certain *Active Directory* attacks may require you to know the *Domain SID* which can be easily obtained using the *--get-sid* flag:
 
-![](Pasted image 20250315113344.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250315113344.png)
 
 Next, let's turn over to the *--admin-count* flag which allows listing *privileged groups* & *users* within a domain. This will provide you with a list of high-end targets worth looking into.
 
-![](Pasted image 20250315113724.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250315113724.png)
 
 Next, let's look into user descriptions. Never know what you might find there 😉
 
-![](Pasted image 20250315123932.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250315123932.png)
 
 Following up is the *whoami* module which allows getting some basic information about a user we have compromised. This information includes the user's *description*, *group memberships*, etc.
 
-![](Pasted image 20250315124137.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250315124137.png)
 
 Moving on, let's say you'd like to know *group memberships* for a specific user. Even one that you haven't yet compromised. We could make use of the *groupmembership* module to achieve that.
 
@@ -981,7 +987,7 @@ In this example, we are looking to identify the groups the *bank-admin* user is 
 $ netexec ldap 10.250.0.20 -u 'administrator' -p 'lab123!' -M groupmembership -o USER="bank-admin"
 ```
 
-![](Pasted image 20250315124456.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250315124456.png)
 
 Well, that's cool - but let's say you've identified an interesting group to target and you'd like to know which users are a part of it? The *group-mem* module will help us with that!
 
@@ -989,13 +995,13 @@ Well, that's cool - but let's say you've identified an interesting group to targ
 $ netexec ldap 10.250.0.20 -u 'administrator' -p 'lab123!' -M group-mem -o GROUP="Bank Administrators"
 ```
 
-![](Pasted image 20250315124703.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250315124703.png)
 
 Next up is the *get-network* module which as the name suggests, allows us to obtain subnet information. The organization in question may have multiple subnets forcing us to setup pivot points to move laterally.
 
 *PS:* Dumped records will be saved in the netexec *logs* dir!
 
-![](Pasted image 20250315164052.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250315164052.png)
 
 Multiple subnets are usually an indication of other domains! When it comes to other domains, we may look out for *domain trusts*. In most cases, it is not uncommon to have users exist in multiple domains... all while having the same passwords! If that's the case, that's your foothold to the domain next door!
 
@@ -1049,7 +1055,7 @@ The famous *Zerologon* exploit came out back in 2020 and is to this day exploite
 
 To test whether or not your target is vulnerable, we can make use of the *zerologon* module.
 
-![](Pasted image 20250315195230.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250315195230.png)
 
 In this case, the target isn't vulnerable. But if it were, it could be abused using: https://github.com/dirkjanm/CVE-2020-1472.
 
@@ -1069,15 +1075,15 @@ In simple terms, it's very similar to *SMB* in a way that users can both downloa
 
 When it comes to *FTP*, if anonymous access was enabled, when use *netexec* to list out available files & directories like so:
 
-![](Pasted image 20250315200313.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250315200313.png)
 
 Looks like we only have *1* file available being *note.txt*. Let's get it downloaded:
 
-![](Pasted image 20250315200358.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250315200358.png)
 
 And now, let's try to upload something. Reading files with anonymous access is one thing, but writing will likely require you to have some sort of valid credentials.
 
-![](Pasted image 20250315201101.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250315201101.png)
 
 And that's pretty much it. Like we said in the beginning, there's really not that much to do with *FTP*. 
 
@@ -1110,7 +1116,7 @@ SELECT * FROM StdRegProv # Registry Information
 
 Let's run a sample query with *netexec* now. To do so, we'll need to specify our query in the *--wmi* parameter like shown below:
 
-![](Pasted image 20250315222248.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250315222248.png)
 
 Additionally, you have the possibility to specify a different namespace to be used for those queries. WMI namespaces are containers that organize different classes and objects in the Windows Management Instrumentation (WMI) framework. 
 
@@ -1322,7 +1328,7 @@ And below are some queries that associate to each separate namespace.
 
 To specify a custom namespace to be used, we can use the *--wmi-namespace* flag. If we use the correct namespace for our query, results will be returned. Otherwise, you'll be faced with the following error:
 
-![](Pasted image 20250315223845.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250315223845.png)
 
 For most queries, we can omit specifying the namespace. The already default *root\cimv2* namespace will match all the information we need to gather as attackers 99% of the time.
 
@@ -1330,14 +1336,14 @@ Alright, let's move on from *WMI queries*.
 
 Similarly to *SMB*, *WMI* also allows us to execute *system* commands. Once again, the syntax is very simple. All we need to do is use the *-x* flag and specify our desired command.
 
-![](Pasted image 20250315224208.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250315224208.png)
 
 We can also alter the method of execution. For *WMI*, two methods are offered: *wmiexec* & *wmiexec-event*. *netexec* also provides us with a short description of both.
 
 * *wmiexec* -> [wmiexec (win32_process + StdRegProv)]
 * *wmiexec-event* -> [wmiexec-event (T1546.003)]: this method is not very stable, highly recommended to use this method on a single host, using it on multiple hosts may result in crashes
 
-![](Pasted image 20250315224459.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250315224459.png)
 
 Well, that wraps it up for *WMI*. Let's talk about *VNC* next!
 
@@ -1347,7 +1353,7 @@ Well, that wraps it up for *WMI*. Let's talk about *VNC* next!
 
 With *netexec*, the main cool thing that we can do is take a screenshot using the *--screenshot* flag. You will notice that our username is *userdoesntmatter* in this case. This is because *VNC* only requires us to know a *password* as opposed to a *username/password* combination.
 
-![](Pasted image 20250316113644.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250316113644.png)
 
 The resulting *screenshot* is saved on our system. To quickly open it from the terminal, we can use *feh* which can be installed using apt:
 
@@ -1355,7 +1361,7 @@ The resulting *screenshot* is saved on our system. To quickly open it from the t
 $ sudo apt install feh
 ```
 
-![](Pasted image 20250316151246.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250316151246.png)
 
 That's pretty much it for *VNC*. It is worth mentioning that *VNC* also supports the use of *Kerberos*so that's something to keep in mind. We'll be skipping *RDP* since the overall flow is the same.
 
@@ -1370,11 +1376,11 @@ For example, a *Windows* based login may be something like *YL-Labs\tom.smith* w
 
 For a *Windows* based login, we may use the *Domain Administrator* account for example:
 
-![](Pasted image 20250318120133.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250318120133.png)
 
 For an *SQL* based login, we could make use of the default *sysadmin* account which is *sa*:
 
-![](Pasted image 20250318120225.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250318120225.png)
 
 Notice how we added the *--local-auth* flag for *SQL* based logins. Without the flag, we'd get this error:
 
@@ -1382,7 +1388,7 @@ Notice how we added the *--local-auth* flag for *SQL* based logins. Without the 
 (Login failed. The login is from an untrusted domain and cannot be used with Integrated authentication. Please try again with or without '--local-auth')
 ```
 
-![](Pasted image 20250318120254.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250318120254.png)
 
 ### Queries on DB's
 
@@ -1403,7 +1409,7 @@ With that said, let's run our first query to list the databases:
 $ netexec mssql 10.250.0.20 -u 'administrator' -p 'lab123!' -q "select name from sys.databases"
 ```
 
-![](Pasted image 20250318121436.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250318121436.png)
 
 Looks like the only non-default database in this case is *logins*. Let's list its tables:
 
@@ -1411,7 +1417,7 @@ Looks like the only non-default database in this case is *logins*. Let's list it
 $ netexec mssql 10.250.0.20 -u 'administrator' -p 'lab123!' -q "use logins; SELECT name FROM SYSOBJECTS WHERE xtype = 'U'"
 ```
 
-![](Pasted image 20250318121648.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250318121648.png)
 
 Alrighty, only 1 table being *users*. Looks promising. Let's select everything from it:
 
@@ -1419,7 +1425,7 @@ Alrighty, only 1 table being *users*. Looks promising. Let's select everything f
 $ netexec mssql 10.250.0.20 -u 'administrator' -p 'lab123!' -q "use logins; select * from users;"
 ```
 
-![](Pasted image 20250318121807.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250318121807.png)
 
 As expected, we get a bunch of creds! Of course, keep in mind that we were using a highly privileged account to run our queries. Depending on your access, you may or may not be able to access certain databases.
 
@@ -1429,7 +1435,7 @@ To verify your access, you may use the *HAS_DBACCESS* function like so:
 $ netexec mssql 10.250.0.20 -u 'administrator' -p 'lab123!' -q "SELECT HAS_DBACCESS('logins');"
 ```
 
-![](Pasted image 20250318122112.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250318122112.png)
 
 If *1* is returned, you have access otherwise you don't (*0*). 
 
@@ -1441,7 +1447,7 @@ Another way to check is to verify your specific permissions on a database. At th
 $ netexec mssql 10.250.0.20 -u 'administrator' -p 'lab123!' -q "use logins; SELECT * FROM fn_my_permissions(NULL, 'DATABASE');" | grep -i connect
 ```
 
-![](Pasted image 20250318122143.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250318122143.png)
 
 *CHECK FOR SELECT*
 
@@ -1449,7 +1455,7 @@ $ netexec mssql 10.250.0.20 -u 'administrator' -p 'lab123!' -q "use logins; SELE
 $ netexec mssql 10.250.0.20 -u 'administrator' -p 'lab123!' -q "use logins; SELECT * FROM fn_my_permissions(NULL, 'DATABASE');" | grep -i select
 ```
 
-![](Pasted image 20250318122628.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250318122628.png)
 
 ### Other MSSQL Attacks
 
@@ -1465,17 +1471,17 @@ Of course, with the possibility to run any queries, you can go far beyond simple
 
 If we have compromised a highly privileged account, we can attempt to use *MSSQL* to achieve code execution. The *xp_cmdshell* will allow us to do so. Although disabled by default, we can re-enable it and use it for our needs. Luckily, *netexec* takes care of that for us. To use this functionality, all we need to do is add the *-x* flag like so:
 
-![](Pasted image 20250318124408.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250318124408.png)
 
 You'll notice that execution here happens as the *nt service\mssqlserver* which is the default service account configured to run *MSSQL*. 
 
 Similarly, *netexec* can also help us in reading/writing files as well. For example, if we wanted to read the *C:\Windows\win.ini* file, we can. This is a world readable file so in theory, any user should be able to read it.
 
-![](Pasted image 20250318125351.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250318125351.png)
 
 And writing files:
 
-![](Pasted image 20250318125614.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250318125614.png)
 
 I had some trouble getting it to work. Sometimes it would, sometimes it wouldn't. But the main thing to keep in mind when writing files is permissions. Make sure that you are indeed able to write to the location you're targeting.
 
@@ -1495,19 +1501,19 @@ So that wraps up our quick overview of *MSSQL*. Of course, once again worth ment
 
 Starting off with command execution. Once again, the *-x* flag can be used for this purpose.
 
-![](Pasted image 20250318130023.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250318130023.png)
 
 ### SAM
 
 Dumping the *SAM* database is also possible through *WinRM* though keep in mind that you need to be an *administrator* to perform the procedure.
 
-![](Pasted image 20250318130242.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250318130242.png)
 
 ### LSA
 
 Same story with *LSA Secrets*. An *administrator* user is required.
 
-![](Pasted image 20250318130303.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250318130303.png)
 
 ### Dumping Methods
 
@@ -1518,11 +1524,11 @@ If you are unable to dump *SAM* or *LSA* secrets, you may attempt to change the 
 
 Using *cmd*:
 
-![](Pasted image 20250318130542.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250318130542.png)
 
 Using *powershell*:
 
-![](Pasted image 20250318130650.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250318130650.png)
 
 Well, that's *WinRM* folks! Once again, *Kerberos* is also available and can be used along side *WinRM* for authentication.
 
@@ -1543,7 +1549,7 @@ With normal username/password authentication:
 $ netexec ssh localhost -u ori -p kali
 ```
 
-![](Pasted image 20250318131119.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250318131119.png)
 
 With a private key:
 
@@ -1563,7 +1569,7 @@ fV6tS4oSbean054we0SlAAAAB29yaUBvcmkBAgMEBQY=
 $ netexec ssh localhost -u ori -p '' --key-file /home/ori/.ssh/id_ed25519
 ```
 
-![](Pasted image 20250318160735.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250318160735.png)
 
 Notice how we specify the *-p* parameter regardless. *Private keys* may be password-encrypted. If that's the case, the password would need to be specified in the *-p* parameter. In our case however, our private key is not encrypted hence we specified an empty string for *-p*.
 
@@ -1571,14 +1577,14 @@ Notice how we specify the *-p* parameter regardless. *Private keys* may be passw
 
 With *SSH* too, the *-x* parameter can be used to run commands:
 
-![](Pasted image 20250318161200.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250318161200.png)
 
 ### Sudo Check
 
 *netexec* also provides us with the *--sudo-check* flag which can be used to check for *sudo* access on the system. In our case example, we simply allowed our user to run any commands with sudo. This is the default configuration if a user is added into the *sudo* group.
 
 
-![](Pasted image 20250318161415.png)
+![](assets/imgs/netexec-mastery/Pasted image 20250318161415.png)
 
 If the check fails, methods used to check can also be adjusted. For instance:
 
