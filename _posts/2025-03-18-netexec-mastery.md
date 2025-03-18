@@ -1,13 +1,19 @@
 ---
-layout: post
-pin: true
-title: Netexec Mastery
-date: '2025-03-18 18:26:05 -0500'
-categories: [jekyll, netexec]
-tags: [netexec]
-comments: false
+title: "HTB • Sau"
+tags:
+  - "Beginner"
+  - "Linux"
+  - "Easy Difficulty"
+  - "Web"
+  - "CVE"
+  - "SSRF"
+  - "Sudo"
+excerpt: "Sau is an easy machine on Hack The Box that involves web exploitation, Server Side Request Forgery (SSRF), Common Vulnerabilities and Exposures (CVEs), and Sudo policy exploitation."
+categories:
+  - "Writeups"
+  - "Hack the Box Machines"
+img_path: "/assets/img/post/htb-machines-sau/"
 ---
-
 
 # Introduction
 
