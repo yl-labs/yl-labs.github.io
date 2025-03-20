@@ -5,7 +5,6 @@ tags:
 excerpt: "Introductory guide to NetExec"
 categories:
   - "Modules"
-image: "assets/img/netexec-mastery/cover.png"
 ---
 
 # Introduction
