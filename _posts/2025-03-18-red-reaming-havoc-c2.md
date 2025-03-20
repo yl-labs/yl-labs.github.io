@@ -1,3 +1,13 @@
+---
+title: "Red Teaming With Havoc C2"
+tags:
+  - "havoc"
+  - "havoc-c2"
+excerpt: "Red Teaming With Havoc C2"
+categories:
+  - "Courses"
+---
+
 
 # Introduction
 
