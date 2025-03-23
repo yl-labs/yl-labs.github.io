@@ -134,4 +134,4 @@ _September 2021_
 _April 2023_
 
 
-[View Certificate](/assets/certs/ZEPHYR.pdf)
+[View Certificate](/assets/certs/ZEPHYR.jpeg)
