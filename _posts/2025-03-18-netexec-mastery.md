@@ -5,7 +5,7 @@ tags:
 author: Ori
 excerpt: "Introductory guide to NetExec"
 image:
-  path: assets/imgs/netexec-master/cover.png
+  path: assets/imgs/netexec-mastery/cover.png
 categories:
   - "Modules"
 ---
