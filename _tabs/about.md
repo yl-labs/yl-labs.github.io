@@ -4,7 +4,7 @@ icon: fas fa-info-circle
 order: 4
 ---
 
-Welcome! My name's Ori and I'm planning to use this blog to document my research and share the knowledge after I've acquired throughout my career.
+Welcome! My name's Ori and I'm planning to use this blog to document my research and share the knowledge I've acquired throughout my career.
 
 # Future Plans
 
