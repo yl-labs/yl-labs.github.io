@@ -12,6 +12,8 @@ tags:
   - "ETW"
   - "Bypass ETW"
 excerpt: "Red Teaming With Havoc C2"
+image:
+  path: assets/imgs/havoc-c2/Havoc-C2-Framework--1-.png
 categories:
   - "Courses"
 ---
