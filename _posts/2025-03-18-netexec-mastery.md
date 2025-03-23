@@ -2,7 +2,10 @@
 title: "Netexec Mastery - Introduction"
 tags:
   - "netexec"
+author: Ori
 excerpt: "Introductory guide to NetExec"
+image:
+  path: assets/imgs/netexec-master/cover.png
 categories:
   - "Modules"
 ---
